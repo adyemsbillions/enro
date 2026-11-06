@@ -1,0 +1,15 @@
+# Apache / cPanel: point the domain (or a subdomain like api.yoursite.com) at this folder.
+Options -Indexes
+RewriteEngine On
+
+# Pass the Authorization header through to PHP (needed for login tokens)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Never serve private files
+RewriteRule ^(config\.php|config\.example\.php|src/|storage/|database/|bin/) - [F,L]
+
+# /api/* -> api/index.php
+RewriteRule ^api(/.*)?$ api/index.php [L,QSA]
+
+# / -> admin panel
+RewriteRule ^$ admin/ [R=302,L]

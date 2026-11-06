@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enro Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#5B3DF5;--p2:#8A6CFF;--pl:#EEEBFF;
+  --gold:#E89B00;--goldl:#FFF4D6;
+  --cash:#0E9F62;--cashl:#DCF6E9;
+  --red:#E5484D;--redl:#FDE8E8;
+  --amber:#B76E00;--amberl:#FFF0D1;
+  --bg:#F5F4FA;--card:#fff;--ink:#16141F;--mut:#6D6A80;--line:#E8E6F0;
+  --stage:#E6E3F0;--dark:#16141F;--dark2:#26233A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--stage);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+svg{flex-shrink:0}
+
+/* top switcher */
+.top{display:flex;align-items:center;gap:14px;padding:10px 20px;background:var(--dark);color:#fff;position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.top .brand{font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px}
+.top .brand small{font-weight:500;color:#9C98B5;font-size:12px}
+.seg{display:flex;background:var(--dark2);border-radius:10px;padding:3px;margin-left:auto}
+.seg button{padding:7px 14px;border-radius:8px;font-weight:600;font-size:13px;color:#B9B5D0}
+.seg button.on{background:#fff;color:var(--ink)}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--p),var(--p2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+
+/* mobile stage */
+.stage{display:flex;gap:28px;justify-content:center;padding:28px 16px;align-items:flex-start}
+.jump{width:210px;background:#fff;border-radius:16px;padding:12px;position:sticky;top:76px}
+.jump .jt{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);padding:4px 10px 8px}
+.jump button{display:block;width:100%;text-align:left;padding:7px 10px;border-radius:8px;font-size:13px;font-weight:500}
+.jump button:hover{background:var(--bg)}
+.jump button.on{background:var(--pl);color:var(--p);font-weight:700}
+.jump hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.notes{width:240px;background:#fff;border-radius:16px;padding:16px;position:sticky;top:76px;font-size:13px;color:var(--mut);line-height:1.55}
+.notes h4{color:var(--ink);font-size:13px;margin-bottom:6px}
+.notes p+h4{margin-top:14px}
+.phone{width:390px;height:812px;background:#0B0A10;border-radius:50px;padding:11px;box-shadow:0 30px 60px -20px rgba(40,20,120,.35);flex-shrink:0}
+.scr{width:100%;height:100%;background:var(--bg);border-radius:40px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.scr.dark{background:linear-gradient(160deg,#6A4BFF,#3B1FC7);color:#fff}
+.status{height:46px;display:flex;justify-content:space-between;align-items:center;padding:4px 28px 0;font-size:14px;font-weight:700;flex-shrink:0}
+.status .r{display:flex;gap:6px;align-items:center}
+.body{flex:1;overflow-y:auto;position:relative;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.pad{padding:8px 20px 24px}
+.nav{height:78px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:10px;flex-shrink:0}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#9A97AC;width:64px}
+.nav button.on{color:var(--p)}
+
+/* ui atoms */
+.h1{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.h2{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.h3{font-size:15px;font-weight:700}
+.sub{color:var(--mut);font-size:14px;line-height:1.5}
+.sm{font-size:12px;color:var(--mut)}
+.card{background:var(--card);border-radius:18px;padding:16px;border:1px solid var(--line)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:14px;background:var(--p);color:#fff;font-weight:700;font-size:15px;transition:.15s}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.cash{background:var(--cash)}
+.btn.dis{background:#C9C5DA;pointer-events:none}
+.btn.sm{height:38px;font-size:13px;border-radius:10px;width:auto;padding:0 14px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.inp{display:flex;align-items:center;gap:10px;height:52px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;color:var(--mut)}
+.inp:focus-within{border-color:var(--p)}
+.inp input,.inp select{flex:1;border:0;outline:0;background:none;font-size:15px;color:var(--ink);min-width:0}
+textarea.ta{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;min-height:80px;outline:0;resize:none;font-size:14px}
+textarea.ta:focus{border-color:var(--p)}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chip{padding:8px 14px;border-radius:99px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill.coin{background:var(--goldl);color:var(--amber)}
+.pill.cash{background:var(--cashl);color:var(--cash)}
+.pill.pend{background:var(--amberl);color:var(--amber)}
+.pill.ok{background:var(--cashl);color:var(--cash)}
+.pill.bad{background:var(--redl);color:var(--red)}
+.pill.pur{background:var(--pl);color:var(--p)}
+.pill.grey{background:#EEEDF3;color:var(--mut)}
+.ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex-shrink:0}
+.ico.p{background:var(--pl);color:var(--p)}
+.ico.g{background:var(--goldl);color:var(--gold)}
+.ico.c{background:var(--cashl);color:var(--cash)}
+.ico.r{background:var(--redl);color:var(--red)}
+.list .it{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.list .it:last-child{border-bottom:0}
+.list .it .t{flex:1;min-width:0}
+.list .it .t b{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.taskc{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;width:100%;text-align:left}
+.taskc .t{flex:1;min-width:0}
+.taskc .t b{display:block;font-size:14px;font-weight:700;line-height:1.3}
+.taskc.done{opacity:.55}
+.bar{height:6px;border-radius:9px;background:#ECEAF3;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--cash);border-radius:9px}
+.back{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid var(--line);display:grid;place-items:center}
+.hdr{display:flex;align-items:center;gap:12px;padding:6px 20px 12px}
+.hdr .h2{flex:1}
+.av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFB86B,#FF6B8B);color:#fff;font-weight:800;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.dot{position:relative}
+.dot::after{content:'';position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff}
+
+/* ad slots */
+.ad{border:1.5px dashed #C8C2E6;border-radius:12px;background:repeating-linear-gradient(45deg,#FAF9FE,#FAF9FE 8px,#F3F1FB 8px,#F3F1FB 16px);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8C86AE;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;gap:2px;text-align:center}
+.ad span{font-weight:500;text-transform:none;letter-spacing:0;font-size:11px}
+
+/* balance hero */
+.hero{border-radius:22px;padding:18px;background:linear-gradient(140deg,#6A4BFF 0%,#4527D9 100%);color:#fff;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.08);right:-60px;top:-80px}
+.hero .bal{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative}
+.hero .bx{background:rgba(255,255,255,.13);border-radius:14px;padding:12px}
+.hero .bx small{font-size:11.5px;opacity:.8;font-weight:600;display:flex;align-items:center;gap:5px}
+.hero .bx b{display:block;font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.01em}
+.hero .bx em{font-style:normal;font-size:11px;opacity:.75}
+.hero .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;position:relative}
+.hero .acts button{height:40px;border-radius:11px;background:#fff;color:var(--p);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+.cat{border-radius:18px;padding:16px;color:#fff;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:150px;position:relative;overflow:hidden}
+.cat b{font-size:16px;font-weight:800}
+.cat small{font-size:12px;opacity:.85;line-height:1.4}
+.cat .tag{align-self:flex-start;background:rgba(255,255,255,.22);padding:3px 8px;border-radius:99px;font-size:11px;font-weight:700;margin-top:auto}
+.streak{display:flex;justify-content:space-between}
+.streak div{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--mut)}
+.streak i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;background:#F0EEF6;color:#A7A3BB}
+.streak .y i{background:var(--goldl);color:var(--gold)}
+.streak .n i{background:var(--p);color:#fff;box-shadow:0 0 0 3px var(--pl)}
+
+/* onboarding */
+.ob{display:flex;flex-direction:column;height:100%;padding:0 24px 28px}
+.illus{flex:1;display:grid;place-items:center;position:relative}
+.illus .big{width:200px;height:200px;border-radius:56px;display:grid;place-items:center;color:#fff;transform:rotate(-6deg);box-shadow:0 30px 50px -20px rgba(91,61,245,.55)}
+.illus .big svg{transform:rotate(6deg)}
+.float{position:absolute;background:#fff;border-radius:14px;padding:9px 12px;font-size:13px;font-weight:800;box-shadow:0 12px 30px -10px rgba(30,20,80,.25);display:flex;align-items:center;gap:6px}
+.dots{display:flex;gap:6px;justify-content:center;margin:20px 0}
+.dots i{width:8px;height:8px;border-radius:9px;background:#D6D2E6;transition:.2s}
+.dots i.on{width:24px;background:var(--p)}
+
+/* otp */
+.otp{display:flex;gap:10px;justify-content:center}
+.otp input{width:46px;height:56px;border-radius:14px;border:1.5px solid var(--line);text-align:center;font-size:22px;font-weight:800;outline:0;background:#fff}
+.otp input:focus{border-color:var(--p)}
+
+/* wallet */
+.tabs{display:flex;background:#ECEAF3;border-radius:13px;padding:4px}
+.tabs button{flex:1;height:38px;border-radius:10px;font-size:13px;font-weight:700;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.nets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.net{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:700}
+.net i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:800}
+.net.on{border-color:var(--p);background:var(--pl)}
+.amts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.amt{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:12px;text-align:left}
+.amt b{display:block;font-size:17px;font-weight:800}
+.amt.on{border-color:var(--p);background:var(--pl)}
+.amt.no{opacity:.45}
+
+.upload{border:1.5px dashed #BDB6E3;border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--p);background:#FBFAFF;width:100%}
+.upload.done{border-style:solid;border-color:var(--cash);color:var(--cash);background:var(--cashl)}
+.steps{counter-reset:s}
+.steps li{list-style:none;display:flex;gap:12px;padding:8px 0;font-size:14px;line-height:1.45}
+.steps li::before{counter-increment:s;content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--pl);color:var(--p);font-weight:800;font-size:12px;display:grid;place-items:center;flex-shrink:0}
+
+/* overlays */
+.toast{position:absolute;left:50%;bottom:96px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;z-index:30;display:flex;gap:8px;align-items:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.ovl{position:absolute;inset:0;background:rgba(10,8,20,.92);z-index:20;display:flex;flex-direction:column;padding:56px 20px 30px;color:#fff}
+.ovl .ad{flex:1;border-color:#4A4566;background:repeating-linear-gradient(45deg,#1D1A2B,#1D1A2B 10px,#232035 10px,#232035 20px);color:#8F8AB0;font-size:13px}
+.ovl .x{align-self:flex-end;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;margin-bottom:12px;font-size:13px;font-weight:800}
+.sheet{position:absolute;inset:0;background:rgba(10,8,20,.45);z-index:20;display:flex;align-items:flex-end}
+.sheet .in{background:#fff;width:100%;border-radius:26px 26px 0 0;padding:24px 20px 30px;text-align:center}
+
+/* admin */
+.adm{display:flex;min-height:calc(100vh - 52px)}
+.side{width:236px;background:var(--dark);color:#B7B3CC;padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+.side .lg{display:flex;align-items:center;gap:10px;color:#fff;font-weight:800;padding:4px 10px 18px}
+.side button{display:flex;gap:11px;align-items:center;width:100%;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;text-align:left}
+.side button:hover{background:#1F1C2E}
+.side button.on{background:var(--dark2);color:#fff}
+.side button .n{margin-left:auto;background:var(--red);color:#fff;font-size:11px;border-radius:99px;padding:1px 7px}
+.main{flex:1;padding:24px 28px;min-width:0}
+.atop{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.atop .h1{flex:1;font-size:24px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.kpi small{font-size:12.5px;color:var(--mut);font-weight:600}
+.kpi b{display:block;font-size:24px;font-weight:800;margin:6px 0 4px;letter-spacing:-.02em}
+.kpi em{font-style:normal;font-size:12px;font-weight:700;color:var(--cash)}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:16px}
+.tblw{background:#fff;border:1px solid var(--line);border-radius:16px;overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px}
+.tbl th{text-align:left;color:var(--mut);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:12px 14px;border-bottom:1px solid var(--line);background:#FBFAFD}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .u{display:flex;align-items:center;gap:10px}
+.tbl .u .av{width:32px;height:32px;font-size:12px}
+.acts{display:flex;gap:6px}
+.ab{height:32px;padding:0 12px;border-radius:9px;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:#fff;display:inline-flex;align-items:center;gap:5px}
+.ab.ok{background:var(--cash);border-color:var(--cash);color:#fff}
+.ab.no{color:var(--red)}
+.ab.pri{background:var(--p);border-color:var(--p);color:#fff}
+.thumb{width:44px;height:44px;border-radius:9px;background:linear-gradient(135deg,#DCD6FF,#F2EFFF);display:grid;place-items:center;color:var(--p)}
+.sw{width:40px;height:23px;border-radius:99px;background:#D3D0DE;position:relative;transition:.2s;flex-shrink:0}
+.sw::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--cash)}
+.sw.on::after{left:20px}
+.atabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.atabs button{padding:10px 14px;font-weight:700;font-size:14px;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1px}
+.atabs button.on{color:var(--p);border-color:var(--p)}
+.modal{position:fixed;inset:0;background:rgba(10,8,20,.5);z-index:100;display:grid;place-items:center;padding:16px}
+.modal .in{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.adinp{height:42px;border:1.5px solid var(--line);border-radius:11px;padding:0 12px;width:100%;outline:0;font-size:14px;background:#fff}
+.adinp:focus{border-color:var(--p)}
+.set{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.set:last-child{border-bottom:0}
+.set .t{flex:1}
+.set .t b{display:block;font-size:14px}
+.atoast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:.25s;z-index:200;pointer-events:none}
+.atoast.show{opacity:1;transform:translate(-50%,0)}
+.alogin{min-height:calc(100vh - 52px);display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 20% 20%,#E9E4FF,transparent 50%),var(--bg)}
+
+@media(max-width:1100px){.notes{display:none}}
+@media(max-width:760px){
+  .jump{display:none}
+  .stage{padding:0}
+  .phone{width:100%;max-width:440px;height:calc(100vh - 52px);border-radius:0;padding:0;box-shadow:none}
+  .scr{border-radius:0}
+  .side{width:64px;padding:14px 8px}.side span,.side .n,.side .lg b{display:none}
+  .main{padding:18px 16px}
+  .grid2,.f2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><div class="logo">E</div>Enro <small>Prototype · Do tasks & earn</small></div>
+  <div class="seg">
+    <button data-v="mobile" onclick="setView('mobile')">Mobile app</button>
+    <button data-v="admin" onclick="setView('admin')">Admin panel</button>
+  </div>
+</div>
+<div id="app"></div>
+<div id="atoast" class="atoast"></div>
+
+<script>
+/* ---------- icons ---------- */
+const I={
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
+bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+play:'<circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/>',
+link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.5 2.4 3.5 5.2"/>',
+send:'<path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/>',
+book:'<path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2z"/><path d="M12 6v14"/>',
+download:'<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>',
+edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+back:'<path d="M15 5l-7 7 7 7"/>',
+chev:'<path d="m9 5 7 7-7 7"/>',
+check:'<path d="m5 12.5 4.5 4.5L19 7"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',
+gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8S10.5 3 8 4s0 4 4 4zM12 8s1.5-5 4-4 0 4-4 4z"/>',
+phone:'<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18h2"/>',
+wifi:'<path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8"/>',
+bank:'<path d="M3 10 12 4l9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 21h18"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+logout:'<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h11"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+coin:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9.3c-.4-.9-1.3-1.5-2.5-1.5-1.5 0-2.5.8-2.5 1.9 0 2.5 5 1.3 5 4 0 1.1-1 1.9-2.5 1.9-1.2 0-2.1-.6-2.5-1.5M12 6v1.8M12 16.2V18"/>',
+cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+fire:'<path d="M12 21c-4 0-7-2.7-7-6.5 0-4 4-6 4-10 2.5 1.5 4 4 4 6 1-1 1.5-2 1.5-3.5C17 9 19 11.5 19 14.5c0 3.8-3 6.5-7 6.5z"/>',
+help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5h.01"/>',
+doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+ad:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l2-6 2 6M7.7 13h2.6M14 9v6h1.5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2z"/>',
+image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/>',
+ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+trend:'<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+};
+const ic=(n,s=20,w=2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${I[n]||''}</svg>`;
+const fmt=n=>Number(n).toLocaleString('en-NG');
+const N=n=>'₦'+fmt(n);
+
+/* ---------- data ---------- */
+const TASKS=[
+ {id:1,title:'Watch a 30-second video ad',type:'Watch',icon:'play',reward:20,time:'30s',sec:6,desc:'Watch the sponsored video to the end. Keep this screen open until the timer finishes.'},
+ {id:2,title:'Visit sponsor website',type:'Visit',icon:'link',reward:15,time:'20s',sec:5,desc:'Open the sponsor page and stay on it for at least 20 seconds.'},
+ {id:3,title:'Daily check-in',type:'Daily',icon:'calendar',reward:10,time:'5s',sec:2,desc:'Check in every day to keep your streak alive. 7-day streak = 100 bonus coins.'},
+ {id:4,title:'Follow @EnroApp on X',type:'Social',icon:'users',reward:30,time:'1 min',sec:4,desc:'Follow our official account, then come back here to claim your coins.'},
+ {id:5,title:'Join Enro Telegram channel',type:'Social',icon:'send',reward:25,time:'1 min',sec:4,desc:'Join the channel for updates, bonus codes and new special tasks.'},
+ {id:6,title:'Read a sponsored article',type:'Visit',icon:'book',reward:15,time:'60s',sec:5,desc:'Scroll through the article for at least 60 seconds.'},
+ {id:7,title:'Watch a 15-second video ad',type:'Watch',icon:'play',reward:10,time:'15s',sec:4,desc:'Short sponsored clip. Keep the screen open until the timer finishes.'},
+];
+const SPECIAL=[
+ {id:101,title:'Install & sign up on PayFlex app',reward:250,slots:500,taken:342,icon:'download',eta:'5 min',steps:['Tap “Open task link” and install PayFlex from the Play Store','Open the app and create an account with your real details','Take a screenshot of your PayFlex dashboard','Upload the screenshot below and submit for review']},
+ {id:102,title:'Complete a 10-minute product survey',reward:400,slots:200,taken:87,icon:'clipboard',eta:'10 min',steps:['Tap “Open task link” to start the survey','Answer every question honestly — rushed answers get rejected','Copy the completion code shown at the end','Paste the code below and upload a screenshot']},
+ {id:103,title:'Subscribe to TechNaija on YouTube',reward:80,slots:1000,taken:812,icon:'play',eta:'2 min',steps:['Open the channel and tap Subscribe','Like the latest video','Screenshot showing “Subscribed”','Upload and submit']},
+ {id:104,title:'Write a Play Store review for ShopKart',reward:150,slots:300,taken:120,icon:'edit',eta:'4 min',steps:['Install ShopKart and use it for 2 minutes','Leave an honest review of at least 20 words','Screenshot your published review','Upload and submit']},
+ {id:105,title:'Sign up on LearnHub & verify email',reward:200,slots:400,taken:395,icon:'mail',eta:'3 min',steps:['Open the link and register','Verify your email address','Screenshot the welcome page','Upload and submit']},
+];
+const NETS=[['MTN','#FFCB05','#1a1a1a'],['Glo','#3BB54A','#fff'],['Airtel','#E40000','#fff'],['9mobile','#006E53','#fff']];
+const AIRTIME=[100,200,500,1000];
+const DATA=[['500MB','1 day',1500],['1GB','7 days',2800],['2GB','30 days',5200],['5GB','30 days',12000]];
+
+const S={view:'mobile',scr:'splash',slide:0,coins:2450,cash:3500,done:{},sub:{},taskId:1,stId:101,proof:false,
+ wtab:'airtime',wsub:'airtime',net:'MTN',amt:null,phone:'08031234567',bank:'GTBank',acct:'',wamt:'',tfilter:'All',hfilter:'All',
+ hist:[
+  {t:'Watch a 30-second video ad',k:'coin',v:20,s:'ok',d:'Today, 9:12 AM'},
+  {t:'MTN Airtime ₦200',k:'redeem',v:-2000,s:'ok',d:'Yesterday'},
+  {t:'Special: Subscribe to TechNaija',k:'cash',v:80,s:'ok',d:'Yesterday'},
+  {t:'Cash withdrawal → GTBank',k:'wd',v:-2000,s:'pend',d:'Nov 4'},
+  {t:'Referral bonus — Tunde joined',k:'coin',v:200,s:'ok',d:'Nov 3'},
+  {t:'Special: PayFlex sign-up',k:'cash',v:250,s:'bad',d:'Nov 2'},
+ ],
+ adm:'login',apage:'dash',atab:'tasks',ptab:'airtime',modal:false,usearch:''};
+
+/* ---------- core ---------- */
+let lastScr=null,timer=null;
+function setView(v){S.view=v;render()}
+function go(s,patch){clearInterval(timer);if(patch)Object.assign(S,patch);S.scr=s;render();
+ if(s==='splash')setTimeout(()=>{if(S.scr==='splash'&&S.view==='mobile')go('onboarding')},1800)}
+function render(){
+ document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+ const app=document.getElementById('app');
+ const prevBody=document.getElementById('body'),keep=prevBody&&lastScr===S.scr?prevBody.scrollTop:0;
+ app.innerHTML=S.view==='mobile'?mobileShell():adminShell();
+ const b=document.getElementById('body');if(b)b.scrollTop=keep;
+ lastScr=S.scr;
+}
+function toast(msg){const t=document.getElementById('toast');if(!t)return;t.innerHTML=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
+function atoast(msg){const t=document.getElementById('atoast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
+
+/* ---------- mobile shell ---------- */
+const SCREENS=[['splash','Splash'],['onboarding','Onboarding'],['login','Login'],['signup','Sign up'],['otp','Verify OTP'],['-'],
+ ['home','Home'],['tasks','Tasks (coins)'],['taskDetail','Task detail'],['special','Special tasks (cash)'],['specialDetail','Special task detail'],['-'],
+ ['wallet','Wallet & redeem'],['history','History'],['referral','Refer & earn'],['notifications','Notifications'],['profile','Profile']];
+const NAV=[['home','home','Home'],['tasks','list','Tasks'],['special','star','Special'],['wallet','wallet','Wallet'],['profile','user','Profile']];
+const NO_NAV=['splash','onboarding','login','signup','otp','taskDetail','specialDetail','notifications','referral','history'];
+
+function mobileShell(){
+ const s=S.scr;
+ return `<div class="stage">
+  <aside class="jump"><div class="jt">Screens</div>${SCREENS.map(([k,l])=>k==='-'?'<hr>':`<button class="${k===s?'on':''}" onclick="go('${k}')">${l}</button>`).join('')}</aside>
+  <div class="phone"><div class="scr ${s==='splash'?'dark':''}">
+   <div class="status"><span>9:41</span><span class="r">${ic('wifi',15,2.4)}<svg width="24" height="12" viewBox="0 0 24 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="currentColor"/><rect x="21.5" y="4" width="1.5" height="4" rx=".7" fill="currentColor" opacity=".5"/></svg></span></div>
+   <div class="body" id="body">${M[s]()}</div>
+   ${NO_NAV.includes(s)?'':`<div class="nav">${NAV.map(([k,i,l])=>`<button class="${k===s?'on':''}" onclick="go('${k}')">${ic(i,22)}${l}</button>`).join('')}</div>`}
+   <div id="ovl"></div><div id="toast" class="toast"></div>
+  </div></div>
+  <aside class="notes">${NOTES[s]||''}</aside>
+ </div>`;
+}
+const NOTES={
+ home:'<h4>Two ways to earn</h4><p><b>Tasks</b> pay coins → redeem for airtime or data.<br><b>Special tasks</b> pay real cash (₦) → withdraw to bank.</p><h4>Adsterra</h4><p>Dashed boxes are ad slots. Home has a 320×50 banner. Which slots show is controlled from Admin → Ads.</p>',
+ tasks:'<h4>Coin tasks</h4><p>Auto-verified by timer. A native ad slot sits inside the list. After claiming, an interstitial can show (frequency set by admin).</p>',
+ taskDetail:'<h4>Flow</h4><p>Start → timer runs → Claim → Adsterra interstitial → coins credited. Try it.</p>',
+ special:'<h4>Cash tasks</h4><p>Limited slots, need proof (screenshot / code). Admin approves or rejects within 24h.</p>',
+ specialDetail:'<h4>Proof</h4><p>Tap the upload box, then submit. Status becomes “Pending review” and appears in Admin → Submissions.</p>',
+ wallet:'<h4>Redemption</h4><p>Coins → airtime/data (VTU provider, can be automatic).<br>Cash → bank transfer (Paystack/Flutterwave), manual approval by admin.</p>',
+ onboarding:'<h4>Onboarding</h4><p>3 slides explaining the two earning categories. Skip goes straight to login.</p>',
+ login:'<h4>Auth</h4><p>Email + password or Google. Phone OTP on sign-up to limit multiple accounts.</p>',
+ signup:'<h4>Anti-fraud</h4><p>One account per phone & device. Referral code optional.</p>',
+};
+
+/* ---------- mobile screens ---------- */
+const M={
+splash:()=>`<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding-bottom:60px">
+ <div style="width:88px;height:88px;border-radius:26px;background:#fff;color:var(--p);display:grid;place-items:center;font-size:44px;font-weight:800;box-shadow:0 20px 40px -10px rgba(0,0,0,.35)">E</div>
+ <div style="font-size:34px;font-weight:800;letter-spacing:-.03em">Enro</div>
+ <div style="opacity:.8;font-size:14px">Do tasks. Earn airtime, data & cash.</div>
+ <div style="position:absolute;bottom:60px;width:36px;height:36px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></div></div>
+ <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`,
+
+onboarding:()=>{
+ const sl=[
+  {i:'list',g:'linear-gradient(140deg,#7B5CFF,#4527D9)',t:'Complete simple tasks',d:'Watch short ads, visit pages and follow sponsors — every task earns you coins.',f:[['+20 coins','top:18%;left:2%','coin','var(--gold)'],['Task done','bottom:20%;right:0','check','var(--cash)']]},
+  {i:'phone',g:'linear-gradient(140deg,#FFB020,#E07B00)',t:'Turn coins into airtime & data',d:'Redeem instantly for MTN, Glo, Airtel or 9mobile airtime and data bundles.',f:[['MTN ₦500','top:16%;right:0','phone','#C89600'],['1GB data','bottom:22%;left:0','wifi','var(--p)']]},
+  {i:'cash',g:'linear-gradient(140deg,#1FC37E,#0B8A55)',t:'Special tasks pay real cash',d:'Take on bigger tasks, upload proof and withdraw cash straight to your bank.',f:[['+₦250','top:18%;left:4%','cash','var(--cash)'],['Paid to GTBank','bottom:20%;right:0','bank','var(--p)']]},
+ ][S.slide];
+ const last=S.slide===2;
+ return `<div class="ob">
+  <div class="between" style="height:40px"><span></span><button class="sm" style="font-weight:700;font-size:14px;color:var(--mut)" onclick="go('login')">Skip</button></div>
+  <div class="illus"><div class="big" style="background:${sl.g}">${ic(sl.i,92,1.6)}</div>
+   ${sl.f.map(([t,pos,i,c])=>`<div class="float" style="${pos}"><span style="color:${c}">${ic(i,16,2.4)}</span>${t}</div>`).join('')}</div>
+  <div style="text-align:center"><div class="h1">${sl.t}</div><p class="sub mt12" style="padding:0 6px">${sl.d}</p></div>
+  <div class="dots">${[0,1,2].map(i=>`<i class="${i===S.slide?'on':''}"></i>`).join('')}</div>
+  <button class="btn" onclick="${last?"go('signup')":"S.slide++;render()"}">${last?'Get started':'Next'}</button>
+  ${last?`<button class="btn ghost mt12" onclick="go('login')">I already have an account</button>`:''}
+ </div>`},
+
+login:()=>`<div class="pad" style="padding-top:20px">
+ <div class="logo" style="width:52px;height:52px;border-radius:16px;font-size:24px">E</div>
+ <div class="h1 mt20">Welcome back 👋</div><p class="sub mt8">Log in to continue earning.</p>
+ <div class="mt24">
+  <div class="field"><label>Email or phone</label><div class="inp">${ic('mail',18)}<input value="ada@gmail.com"></div></div>
+  <div class="field"><label>Password</label><div class="inp">${ic('lock',18)}<input type="password" value="password123">${ic('eye',18)}</div></div>
+  <div style="text-align:right;margin:-4px 0 20px"><button style="color:var(--p);font-weight:700;font-size:13px">Forgot password?</button></div>
+  <button class="btn" onclick="go('home')">Log in</button>
+  <div class="row mt20" style="color:var(--mut);font-size:12px"><hr style="flex:1;border:0;border-top:1px solid var(--line)">or continue with<hr style="flex:1;border:0;border-top:1px solid var(--line)"></div>
+  <button class="btn ghost mt20" onclick="go('home')"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>Continue with Google</button>
+  <p class="sub mt24" style="text-align:center">New to Enro? <button style="color:var(--p);font-weight:700" onclick="go('signup')">Create account</button></p>
+ </div></div>`,
+
+signup:()=>`<div class="pad" style="padding-top:6px">
+ <button class="back" onclick="go('login')">${ic('back',18)}</button>
+ <div class="h1 mt16">Create your account</div><p class="sub mt8">Start earning airtime, data and cash today.</p>
+ <div class="mt20">
+  <div class="field"><label>Full name</label><div class="inp">${ic('user',18)}<input placeholder="Adaeze Okafor"></div></div>
+  <div class="field"><label>Email</label><div class="inp">${ic('mail',18)}<input placeholder="you@email.com"></div></div>
+  <div class="field"><label>Phone number</label><div class="inp"><b style="color:var(--ink);font-size:14px">🇳🇬 +234</b><input placeholder="803 123 4567"></div></div>
+  <div class="field"><label>Password</label><div class="inp">${ic('lock',18)}<input type="password" placeholder="At least 8 characters"></div></div>
+  <div class="field"><label>Referral code <span class="sm">(optional)</span></label><div class="inp">${ic('gift',18)}<input placeholder="e.g. ENRO-TUNDE"></div></div>
+  <label class="row" style="font-size:13px;color:var(--mut);margin:4px 0 18px;align-items:flex-start"><input type="checkbox" checked style="margin-top:3px;accent-color:var(--p)"> I agree to the Terms of Use and Privacy Policy. One account per person.</label>
+  <button class="btn" onclick="go('otp')">Create account</button>
+  <p class="sub mt20" style="text-align:center">Already have an account? <button style="color:var(--p);font-weight:700" onclick="go('login')">Log in</button></p>
+ </div></div>`,
+
+otp:()=>`<div class="pad" style="padding-top:6px">
+ <button class="back" onclick="go('signup')">${ic('back',18)}</button>
+ <div class="ico p mt24" style="width:64px;height:64px;border-radius:20px">${ic('shield',30)}</div>
+ <div class="h1 mt20">Verify your number</div><p class="sub mt8">Enter the 6-digit code we sent to <b style="color:var(--ink)">+234 803 123 4567</b></p>
+ <div class="otp mt24">${['4','8','2','9','',''].map(v=>`<input maxlength="1" value="${v}">`).join('')}</div>
+ <p class="sub mt20" style="text-align:center">Didn't get it? <b style="color:var(--p)">Resend in 0:42</b></p>
+ <button class="btn mt24" onclick="S.coins+=100;go('home');setTimeout(()=>toast('Welcome bonus: +100 coins'),300)">Verify & continue</button>
+</div>`,
+
+home:()=>{
+ const quick=TASKS.slice(0,3);
+ return `<div class="pad" style="padding-top:4px">
+ <div class="row"><div class="av">AO</div><div style="flex:1"><div class="sm">Good morning</div><div class="h3" style="font-size:17px">Adaeze 👋</div></div>
+  <button class="back dot" onclick="go('notifications')">${ic('bell',19)}</button></div>
+ <div class="hero mt16">
+  <div class="bal">
+   <div class="bx"><small>${ic('coin',14)} Coins</small><b>${fmt(S.coins)}</b><em>≈ ${N(Math.floor(S.coins/10))} airtime</em></div>
+   <div class="bx"><small>${ic('cash',14)} Cash</small><b>${N(S.cash)}</b><em>Withdrawable</em></div>
+  </div>
+  <div class="acts"><button onclick="go('wallet',{wtab:'airtime'})">${ic('phone',16)} Airtime/Data</button><button onclick="go('wallet',{wtab:'cash'})">${ic('bank',16)} Withdraw</button></div>
+ </div>
+ <div class="card mt16"><div class="between"><div class="h3 row" style="gap:6px"><span style="color:#FF7A1A">${ic('fire',18)}</span>4-day streak</div><span class="pill coin">Day 7: +100</span></div>
+  <div class="streak mt12">${['M','T','W','T','F','S','S'].map((d,i)=>`<div class="${i<4?'y':i===4?'n':''}"><i>${i<4?'✓':'+'+(i===6?100:10)}</i>${d}</div>`).join('')}</div></div>
+ <div class="ad mt16" style="height:56px">Adsterra banner · 320×50<span>Home top slot</span></div>
+ <div class="between mt20"><div class="h2" style="font-size:17px">Choose how to earn</div></div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="mt12">
+  <button class="cat" style="background:linear-gradient(150deg,#7B5CFF,#4527D9)" onclick="go('tasks')">${ic('list',26)}<b>Tasks</b><small>Quick tasks that pay coins</small><span class="tag">→ Airtime & data</span></button>
+  <button class="cat" style="background:linear-gradient(150deg,#1FC37E,#0B8A55)" onclick="go('special')">${ic('star',26)}<b>Special Tasks</b><small>Bigger tasks, proof required</small><span class="tag">→ Real cash</span></button>
+ </div>
+ <div class="between mt24"><div class="h2" style="font-size:17px">Quick tasks</div><button style="color:var(--p);font-weight:700;font-size:13px" onclick="go('tasks')">See all</button></div>
+ <div class="mt12">${quick.map(taskCard).join('')}</div>
+ <button class="card row mt8" style="width:100%;text-align:left;background:var(--pl);border-color:#DCD5FF" onclick="go('referral')"><div class="ico p" style="background:#fff">${ic('gift',22)}</div><div style="flex:1"><b style="font-size:14px">Invite friends, earn 200 coins</b><div class="sm">For every friend who completes 5 tasks</div></div>${ic('chev',18)}</button>
+ </div>`},
+
+tasks:()=>{
+ const f=S.tfilter,list=TASKS.filter(t=>f==='All'||t.type===f);
+ const items=list.map(taskCard);if(items.length>3)items.splice(3,0,`<div class="ad" style="height:84px;margin-bottom:10px">Adsterra native ad<span>In-feed slot</span></div>`);
+ const doneCount=Object.keys(S.done).length;
+ return `<div class="hdr"><div class="h2">Tasks</div><span class="pill coin">${ic('coin',13)} ${fmt(S.coins)}</span></div>
+ <div class="pad" style="padding-top:0">
+  <div class="card" style="background:var(--goldl);border-color:#F8E3A8"><div class="between"><div><b style="font-size:14px">Daily progress</b><div class="sm" style="color:var(--amber)">${doneCount} of 10 tasks · earn coins for airtime & data</div></div><b style="font-size:18px;color:var(--amber)">${doneCount*10}%</b></div><div class="bar mt12" style="background:#fff"><i style="width:${doneCount*10}%;background:var(--gold)"></i></div></div>
+  <div class="chips mt16">${['All','Watch','Visit','Social','Daily'].map(c=>`<button class="chip ${c===f?'on':''}" onclick="S.tfilter='${c}';render()">${c}</button>`).join('')}</div>
+  <div class="mt16">${items.join('')||'<p class="sub">No tasks here yet.</p>'}</div>
+ </div>`},
+
+taskDetail:()=>{
+ const t=TASKS.find(x=>x.id===S.taskId),done=S.done[t.id];
+ return `<div class="hdr"><button class="back" onclick="go('tasks')">${ic('back',18)}</button><div class="h2" style="font-size:17px">Task</div></div>
+ <div class="pad" style="padding-top:4px">
+  <div class="card" style="text-align:center;padding:24px 16px">
+   <div class="ico p" style="width:72px;height:72px;border-radius:22px;margin:0 auto">${ic(t.icon,34)}</div>
+   <div class="h2 mt16" style="font-size:19px">${t.title}</div>
+   <div class="row mt12" style="justify-content:center;gap:8px"><span class="pill coin">${ic('coin',13)} +${t.reward} coins</span><span class="pill grey">${ic('clock',13)} ${t.time}</span><span class="pill pur">${t.type}</span></div>
+  </div>
+  <div class="card mt12"><div class="h3">How it works</div><p class="sub mt8">${t.desc}</p>
+   <ul class="steps mt8"><li>Tap <b>Start task</b></li><li>Complete the action and keep the app open</li><li>Tap <b>Claim</b> when the timer ends</li></ul></div>
+  <div class="card mt12 row" style="background:#FBFAFF"><div class="ico g">${ic('wallet',20)}</div><div class="sub" style="font-size:13px"><b style="color:var(--ink)">1,000 coins = ₦100 airtime.</b> Redeem from your wallet anytime above 1,000 coins.</div></div>
+  <div class="mt20" id="tbtn">${done?`<button class="btn dis">${ic('check',18)} Completed today</button>`:`<button class="btn" onclick="startTask(${t.id})">${ic('play',18)} Start task</button>`}</div>
+  <div class="ad mt16" style="height:56px">Adsterra banner · 320×50</div>
+ </div>`},
+
+special:()=>`<div class="hdr"><div class="h2">Special Tasks</div><span class="pill cash">${ic('cash',13)} ${N(S.cash)}</span></div>
+ <div class="pad" style="padding-top:0">
+  <div class="card row" style="background:var(--cashl);border-color:#BDEBD3"><div class="ico c" style="background:#fff">${ic('shield',22)}</div><div><b style="font-size:14px">Earn real cash</b><div class="sm" style="color:#2D7A57">Submit proof · reviewed within 24 hours · withdraw from ${N(1000)}</div></div></div>
+  <div class="chips mt16">${['Available','Pending','Completed'].map((c,i)=>`<button class="chip ${i===0?'on':''}">${c}</button>`).join('')}</div>
+  <div class="mt16">${SPECIAL.map(t=>{const pct=Math.round(t.taken/t.slots*100),st=S.sub[t.id],full=t.taken>=t.slots-5;
+   return `<button class="taskc" style="flex-direction:column;align-items:stretch;gap:10px" onclick="go('specialDetail',{stId:${t.id},proof:false})">
+    <div class="row"><div class="ico c">${ic(t.icon,21)}</div><div class="t"><b>${t.title}</b><div class="sm mt8" style="margin-top:3px">${ic('clock',12)} ${t.eta} · Proof required</div></div><span class="pill cash" style="font-size:13px">${N(t.reward)}</span></div>
+    <div><div class="between sm" style="margin-bottom:5px"><span>${fmt(t.slots-t.taken)} slots left</span>${st?'<span class="pill pend">Pending review</span>':full?'<span class="pill bad">Almost full</span>':`<span>${pct}% taken</span>`}</div><div class="bar"><i style="width:${pct}%"></i></div></div>
+   </button>`}).join('')}</div>
+ </div>`,
+
+specialDetail:()=>{
+ const t=SPECIAL.find(x=>x.id===S.stId),st=S.sub[t.id];
+ return `<div class="hdr"><button class="back" onclick="go('special')">${ic('back',18)}</button><div class="h2" style="font-size:17px">Special task</div></div>
+ <div class="pad" style="padding-top:4px">
+  <div class="card"><div class="row"><div class="ico c" style="width:56px;height:56px;border-radius:17px">${ic(t.icon,28)}</div><div style="flex:1"><b style="font-size:16px;line-height:1.3;display:block">${t.title}</b><div class="row mt8" style="gap:6px"><span class="pill cash">${N(t.reward)} cash</span><span class="pill grey">${t.eta}</span></div></div></div></div>
+  ${st?`<div class="card mt12" style="background:var(--amberl);border-color:#F6DC9E;text-align:center;padding:22px">
+    <div class="ico" style="background:#fff;color:var(--amber);margin:0 auto">${ic('clock',22)}</div>
+    <b style="display:block;margin-top:10px">Submitted — pending review</b><div class="sm mt8" style="color:var(--amber)">We'll credit ${N(t.reward)} to your cash balance once approved (usually within 24h).</div></div>`:`
+  <div class="card mt12"><div class="h3">Steps</div><ul class="steps mt8">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ul>
+   <button class="btn ghost mt8" style="height:44px" onclick="toast('${ic('link',16)} Opening task link…')">${ic('link',17)} Open task link</button></div>
+  <div class="card mt12"><div class="h3">Submit proof</div>
+   <button class="upload mt12 ${S.proof?'done':''}" onclick="S.proof=!S.proof;render()">${ic(S.proof?'check':'upload',26)}<b style="font-size:14px">${S.proof?'screenshot_2026-11-06.jpg':'Upload screenshot'}</b><span class="sm">${S.proof?'Tap to change':'PNG or JPG, max 5MB'}</span></button>
+   <div class="field mt12" style="margin-bottom:0"><label>Username / code used <span class="sm">(optional)</span></label><textarea class="ta" placeholder="e.g. the email you signed up with or completion code"></textarea></div>
+  </div>
+  <div class="card mt12 row" style="background:var(--redl);border-color:#F7C9CB"><span style="color:var(--red)">${ic('ban',20)}</span><div class="sm" style="color:#9B2C2F">Fake or reused proof leads to rejection and may get your account banned.</div></div>
+  <button class="btn cash mt20 ${S.proof?'':'dis'}" onclick="S.sub[${t.id}]=1;S.hist.unshift({t:'Special: ${t.title.replace(/'/g,'')}',k:'cash',v:${t.reward},s:'pend',d:'Just now'});render();toast('${ic('check',16)} Proof submitted for review')">Submit for review</button>`}
+ </div>`},
+
+wallet:()=>{
+ const air=S.wtab==='airtime';
+ return `<div class="hdr"><div class="h2">Wallet</div><button class="back" onclick="go('history')">${ic('clock',18)}</button></div>
+ <div class="pad" style="padding-top:0">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+   <div class="card" style="background:var(--goldl);border-color:#F8E3A8"><div class="sm row" style="gap:5px;color:var(--amber);font-weight:700">${ic('coin',14)} Coins</div><b style="font-size:22px;display:block;margin-top:4px">${fmt(S.coins)}</b><div class="sm">For airtime & data</div></div>
+   <div class="card" style="background:var(--cashl);border-color:#BDEBD3"><div class="sm row" style="gap:5px;color:var(--cash);font-weight:700">${ic('cash',14)} Cash</div><b style="font-size:22px;display:block;margin-top:4px">${N(S.cash)}</b><div class="sm">For bank withdrawal</div></div>
+  </div>
+  <div class="tabs mt16"><button class="${air?'on':''}" onclick="S.wtab='airtime';S.amt=null;render()">Airtime & Data</button><button class="${!air?'on':''}" onclick="S.wtab='cash';render()">Withdraw cash</button></div>
+  ${air?walletAirtime():walletCash()}
+ </div>`},
+
+history:()=>{
+ const f=S.hfilter,list=S.hist.filter(h=>f==='All'||(f==='Coins'?['coin','redeem'].includes(h.k):['cash','wd'].includes(h.k)));
+ return `<div class="hdr"><button class="back" onclick="go('wallet')">${ic('back',18)}</button><div class="h2" style="font-size:17px">History</div></div>
+ <div class="pad" style="padding-top:0">
+  <div class="chips">${['All','Coins','Cash'].map(c=>`<button class="chip ${c===f?'on':''}" onclick="S.hfilter='${c}';render()">${c}</button>`).join('')}</div>
+  <div class="card mt16 list" style="padding:4px 16px">${list.map(h=>{const coin=['coin','redeem'].includes(h.k),neg=h.v<0;
+   return `<div class="it"><div class="ico ${coin?'g':'c'}" style="width:40px;height:40px">${ic(h.k==='redeem'?'phone':h.k==='wd'?'bank':coin?'coin':'cash',19)}</div><div class="t"><b>${h.t}</b><span class="sm">${h.d}</span></div>
+   <div style="text-align:right"><b style="font-size:14px;color:${neg?'var(--ink)':coin?'var(--amber)':'var(--cash)'}">${neg?'−':'+'}${coin?fmt(Math.abs(h.v)):N(Math.abs(h.v))}</b><div class="mt8" style="margin-top:3px"><span class="pill ${h.s}">${{ok:'Success',pend:'Pending',bad:'Rejected'}[h.s]}</span></div></div></div>`}).join('')}</div>
+ </div>`},
+
+referral:()=>`<div class="hdr"><button class="back" onclick="go('home')">${ic('back',18)}</button><div class="h2" style="font-size:17px">Refer & earn</div></div>
+ <div class="pad" style="padding-top:0">
+  <div class="hero" style="text-align:center;padding:24px">
+   <div style="position:relative">${ic('gift',44,1.6)}<div class="h2 mt12" style="color:#fff">Get 200 coins per friend</div><p style="opacity:.85;font-size:13px;margin-top:6px">Your friend gets 100 coins too, after completing 5 tasks.</p>
+   <div style="background:rgba(255,255,255,.15);border:1.5px dashed rgba(255,255,255,.5);border-radius:14px;padding:12px;margin-top:16px" class="between"><b style="font-size:18px;letter-spacing:.05em">ENRO-ADA24</b><button style="background:#fff;color:var(--p);border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px" class="row" onclick="toast('Code copied')">${ic('copy',14)} Copy</button></div></div>
+  </div>
+  <button class="btn mt16">${ic('send',18)} Share invite link</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" class="mt16">
+   ${[['12','Invited'],['7','Qualified'],['1,400','Coins earned']].map(([v,l])=>`<div class="card" style="text-align:center;padding:12px"><b style="font-size:20px">${v}</b><div class="sm">${l}</div></div>`).join('')}</div>
+  <div class="card mt16"><div class="h3">How it works</div><ul class="steps mt8"><li>Share your code with friends</li><li>They sign up and verify their phone</li><li>When they finish 5 tasks, you both get coins</li></ul></div>
+ </div>`,
+
+notifications:()=>`<div class="hdr"><button class="back" onclick="go('home')">${ic('back',18)}</button><div class="h2" style="font-size:17px">Notifications</div><button style="color:var(--p);font-weight:700;font-size:13px">Mark all read</button></div>
+ <div class="pad" style="padding-top:0"><div class="card list" style="padding:4px 16px">
+  ${[['c','check','Special task approved','+₦80 added for “Subscribe to TechNaija”.','2h'],['g','phone','Airtime sent','₦200 MTN airtime sent to 0803 123 4567.','1d'],['p','star','New special task','Install & sign up on PayFlex — earn ₦250.','1d'],['r','ban','Proof rejected','PayFlex sign-up: screenshot didn’t show your dashboard.','4d'],['g','gift','Referral bonus','Tunde completed 5 tasks. +200 coins!','5d']]
+   .map(([c,i,t,d,w])=>`<div class="it" style="align-items:flex-start"><div class="ico ${c}" style="width:40px;height:40px">${ic(i,19)}</div><div class="t"><b>${t}</b><div class="sm" style="line-height:1.45">${d}</div></div><span class="sm">${w}</span></div>`).join('')}
+ </div></div>`,
+
+profile:()=>`<div class="hdr"><div class="h2">Profile</div></div>
+ <div class="pad" style="padding-top:0">
+  <div class="card row"><div class="av" style="width:58px;height:58px;font-size:20px">AO</div><div style="flex:1"><b style="font-size:16px">Adaeze Okafor</b><div class="sm">ada@gmail.com · 0803 123 4567</div><span class="pill pur mt8" style="margin-top:6px">Silver earner</span></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" class="mt12">
+   ${[['148','Tasks done'],['9','Special done'],[N(6200),'Total cashout']].map(([v,l])=>`<div class="card" style="text-align:center;padding:12px 6px"><b style="font-size:17px">${v}</b><div class="sm">${l}</div></div>`).join('')}</div>
+  <div class="card mt16 list" style="padding:2px 16px">
+   ${[['user','Personal information',''],['bank','Bank accounts','GTBank •••• 4821'],['phone','Saved phone numbers','2'],['clock','Transaction history','','history'],['gift','Refer & earn','','referral'],['bell','Notifications','','notifications'],['help','Help & support',''],['doc','Terms & privacy','']]
+    .map(([i,t,v,to])=>`<button class="it" style="width:100%;text-align:left" ${to?`onclick="go('${to}')"`:''}><div class="ico p" style="width:38px;height:38px;border-radius:11px">${ic(i,18)}</div><div class="t"><b style="font-weight:600">${t}</b></div><span class="sm">${v}</span><span style="color:#B5B2C6">${ic('chev',16)}</span></button>`).join('')}
+  </div>
+  <button class="btn ghost mt16" style="color:var(--red)" onclick="go('login')">${ic('logout',18)} Log out</button>
+  <p class="sm mt16" style="text-align:center">Enro v1.0.0</p>
+ </div>`,
+};
+
+function taskCard(t){const d=S.done[t.id];
+ return `<button class="taskc ${d?'done':''}" onclick="go('taskDetail',{taskId:${t.id}})"><div class="ico p">${ic(t.icon,21)}</div><div class="t"><b>${t.title}</b><span class="sm">${t.type} · ${t.time}</span></div>${d?`<span class="pill ok">${ic('check',12)} Done</span>`:`<span class="pill coin">+${t.reward}</span>`}</button>`}
+
+function walletAirtime(){
+ const isAir=S.wsub==='airtime';
+ const opts=isAir?AIRTIME.map(a=>({k:a,label:N(a),cost:a*10,meta:''})):DATA.map(([s,v,c])=>({k:s,label:s,cost:c,meta:v}));
+ const sel=opts.find(o=>o.k===S.amt);
+ return `<div class="chips mt16">${[['airtime','Airtime'],['data','Data bundle']].map(([k,l])=>`<button class="chip ${S.wsub===k?'on':''}" onclick="S.wsub='${k}';S.amt=null;render()">${l}</button>`).join('')}</div>
+  <div class="h3 mt16" style="font-size:14px">Network</div>
+  <div class="nets mt8">${NETS.map(([n,bg,fg])=>`<button class="net ${S.net===n?'on':''}" onclick="S.net='${n}';render()"><i style="background:${bg};color:${fg}">${n==='9mobile'?'9M':n.slice(0,3).toUpperCase()}</i>${n}</button>`).join('')}</div>
+  <div class="field mt16"><label>Phone number</label><div class="inp">${ic('phone',18)}<input value="${S.phone}" oninput="S.phone=this.value"></div></div>
+  <div class="between"><div class="h3" style="font-size:14px">${isAir?'Amount':'Bundle'}</div><span class="sm">1,000 coins = ₦100</span></div>
+  <div class="amts mt8">${opts.map(o=>{const no=o.cost>S.coins;return `<button class="amt ${S.amt===o.k?'on':''} ${no?'no':''}" onclick="S.amt=${typeof o.k==='string'?`'${o.k}'`:o.k};render()"><b>${o.label}</b><span class="sm">${o.meta?o.meta+' · ':''}${fmt(o.cost)} coins</span></button>`}).join('')}</div>
+  <button class="btn mt20 ${sel&&sel.cost<=S.coins?'':'dis'}" onclick="redeem()">${sel?`Redeem for ${fmt(sel.cost)} coins`:'Select an option'}</button>
+  <div class="ad mt16" style="height:56px">Adsterra banner · 320×50</div>`}
+
+function walletCash(){
+ const banks=['GTBank','Access Bank','Zenith Bank','First Bank','UBA','Opay','Kuda','Moniepoint','PalmPay'];
+ const a=Number(S.wamt)||0,ok=a>=1000&&a+50<=S.cash&&S.acct.length===10;
+ return `<div class="card mt16 row" style="background:#FBFAFF;padding:12px"><span style="color:var(--p)">${ic('help',18)}</span><span class="sm">Min ${N(1000)} · Fee ${N(50)} · Paid within 24h after approval</span></div>
+  <div class="field mt16"><label>Bank</label><div class="inp">${ic('bank',18)}<select onchange="S.bank=this.value">${banks.map(b=>`<option ${b===S.bank?'selected':''}>${b}</option>`).join('')}</select></div></div>
+  <div class="field"><label>Account number</label><div class="inp">${ic('cash',18)}<input inputmode="numeric" maxlength="10" placeholder="10-digit account number" value="${S.acct}" oninput="S.acct=this.value.replace(/\\D/g,'');this.value=S.acct;resolveAcct()"></div>
+   <div id="acctname" class="sm" style="margin-top:6px;min-height:16px">${S.acct.length===10?`<span style="color:var(--cash);font-weight:700">${ic('check',13)} ADAEZE CHIOMA OKAFOR</span>`:''}</div></div>
+  <div class="field"><label>Amount</label><div class="inp"><b style="color:var(--ink)">₦</b><input inputmode="numeric" placeholder="0" value="${S.wamt}" oninput="S.wamt=this.value.replace(/\\D/g,'');this.value=S.wamt;resolveAcct()"><button class="pill pur" onclick="S.wamt=String(S.cash-50);render()">Max</button></div></div>
+  <div id="wdbtn"><button class="btn cash ${ok?'':'dis'}" onclick="withdraw()">Withdraw ${a?N(a):''}</button></div>`}
+function resolveAcct(){const el=document.getElementById('acctname');if(el)el.innerHTML=S.acct.length===10?`<span style="color:var(--cash);font-weight:700">${ic('check',13)} ADAEZE CHIOMA OKAFOR</span>`:'';
+ const a=Number(S.wamt)||0,ok=a>=1000&&a+50<=S.cash&&S.acct.length===10;document.getElementById('wdbtn').innerHTML=`<button class="btn cash ${ok?'':'dis'}" onclick="withdraw()">Withdraw ${a?N(a):''}</button>`}
+
+function startTask(id){
+ const t=TASKS.find(x=>x.id===id);let left=t.sec;const box=document.getElementById('tbtn');
+ const paint=()=>{box.innerHTML=`<button class="btn dis" style="background:var(--pl);color:var(--p)">${ic('clock',18)} Keep the app open… ${left}s</button><div class="bar mt8"><i style="width:${(1-left/t.sec)*100}%;background:var(--p)"></i></div>`};
+ paint();toast(`${ic('link',16)} Task opened`);
+ timer=setInterval(()=>{left--;if(left<=0){clearInterval(timer);box.innerHTML=`<button class="btn" style="background:var(--gold)" onclick="claim(${id})">${ic('coin',18)} Claim ${t.reward} coins</button>`}else paint()},1000);
+}
+function claim(id){const t=TASKS.find(x=>x.id===id);
+ showInterstitial(()=>{S.done[id]=1;S.coins+=t.reward;S.hist.unshift({t:t.title,k:'coin',v:t.reward,s:'ok',d:'Just now'});render();toast(`${ic('coin',16)} +${t.reward} coins added`)})}
+function showInterstitial(cb){
+ const o=document.getElementById('ovl');let n=3;
+ const paint=()=>{o.innerHTML=`<div class="ovl"><div class="x" ${n>0?'':'onclick="closeAd()"'} style="${n>0?'':'cursor:pointer'}">${n>0?n:ic('x',18)}</div><div class="ad">${ic('ad',36,1.6)}Adsterra interstitial<span>Full-screen ad after task claim</span></div><div class="sm" style="color:#8F8AB0;text-align:center;margin-top:12px">Ad · closes in ${n>0?n+'s':'— tap ✕'}</div></div>`};
+ window._adcb=cb;paint();const h=setInterval(()=>{n--;paint();if(n<=0)clearInterval(h)},1000)}
+function closeAd(){document.getElementById('ovl').innerHTML='';window._adcb&&window._adcb()}
+function redeem(){
+ const isAir=S.wsub==='airtime';const o=isAir?{l:N(S.amt),c:S.amt*10}:(()=>{const d=DATA.find(x=>x[0]===S.amt);return{l:d[0],c:d[2]}})();
+ S.coins-=o.c;S.hist.unshift({t:`${S.net} ${isAir?'Airtime':'Data'} ${o.l}`,k:'redeem',v:-o.c,s:'ok',d:'Just now'});S.amt=null;render();
+ document.getElementById('ovl').innerHTML=`<div class="sheet" onclick="this.remove()"><div class="in"><div class="ico c" style="width:64px;height:64px;border-radius:50%;margin:0 auto">${ic('check',32,2.6)}</div><div class="h2 mt16">${isAir?'Airtime':'Data'} on its way!</div><p class="sub mt8">${o.l} ${S.net} ${isAir?'airtime':'data'} is being sent to ${S.phone}. ${fmt(o.c)} coins deducted.</p><button class="btn mt20">Done</button></div></div>`}
+function withdraw(){const a=Number(S.wamt);S.cash-=a+50;S.hist.unshift({t:`Cash withdrawal → ${S.bank}`,k:'wd',v:-a,s:'pend',d:'Just now'});S.wamt='';render();
+ document.getElementById('ovl').innerHTML=`<div class="sheet" onclick="this.remove()"><div class="in"><div class="ico c" style="width:64px;height:64px;border-radius:50%;margin:0 auto">${ic('clock',30)}</div><div class="h2 mt16">Withdrawal requested</div><p class="sub mt8">${N(a)} to ${S.bank} •••• ${S.acct.slice(-4)}. You'll be notified once it's paid (usually within 24h).</p><button class="btn mt20">Done</button></div></div>`}
+
+/* ================= ADMIN ================= */
+const AD={
+ tasks:TASKS.map((t,i)=>({...t,cat:'task',on:i!==6,comp:[4210,3120,8950,1880,1430,960,2200][i]})),
+ special:SPECIAL.map((t,i)=>({...t,cat:'special',on:true,comp:t.taken})),
+ subs:[
+  {id:1,u:'Tunde Bakare',ini:'TB',task:'Install & sign up on PayFlex app',r:250,when:'12 min ago',note:'tundeb@gmail.com',s:'pend'},
+  {id:2,u:'Chioma Eze',ini:'CE',task:'Complete a 10-minute product survey',r:400,when:'25 min ago',note:'Code: SV-88213',s:'pend'},
+  {id:3,u:'Musa Ibrahim',ini:'MI',task:'Subscribe to TechNaija on YouTube',r:80,when:'1h ago',note:'@musa_i',s:'pend'},
+  {id:4,u:'Blessing Udo',ini:'BU',task:'Write a Play Store review for ShopKart',r:150,when:'2h ago',note:'Blessing U.',s:'pend'},
+  {id:5,u:'Kelechi Obi',ini:'KO',task:'Sign up on LearnHub & verify email',r:200,when:'3h ago',note:'kelobi@yahoo.com',s:'pend'},
+ ],
+ payouts:[
+  {id:1,u:'Adaeze Okafor',ini:'AO',kind:'airtime',det:'MTN · 0803 123 4567',amt:'₦500 airtime',cost:'5,000 coins',s:'pend'},
+  {id:2,u:'Ibrahim Sani',ini:'IS',kind:'airtime',det:'Airtel · 0802 555 1023',amt:'1GB data',cost:'2,800 coins',s:'pend'},
+  {id:3,u:'Funmi Ade',ini:'FA',kind:'airtime',det:'Glo · 0805 909 1122',amt:'₦200 airtime',cost:'2,000 coins',s:'ok'},
+  {id:4,u:'Tunde Bakare',ini:'TB',kind:'cash',det:'GTBank · 0123456789',amt:'₦2,000',cost:'fee ₦50',s:'pend'},
+  {id:5,u:'Chioma Eze',ini:'CE',kind:'cash',det:'Opay · 8031234567',amt:'₦5,500',cost:'fee ₦50',s:'pend'},
+  {id:6,u:'Musa Ibrahim',ini:'MI',kind:'cash',det:'Kuda · 2004558812',amt:'₦1,200',cost:'fee ₦50',s:'pend'},
+  {id:7,u:'Grace Nwosu',ini:'GN',kind:'cash',det:'Access · 0098776655',amt:'₦3,000',cost:'fee ₦50',s:'ok'},
+ ],
+ users:[
+  {n:'Adaeze Okafor',ini:'AO',e:'ada@gmail.com',coins:2450,cash:3500,t:148,j:'Sep 12',b:false},
+  {n:'Tunde Bakare',ini:'TB',e:'tundeb@gmail.com',coins:820,cash:2250,t:96,j:'Sep 30',b:false},
+  {n:'Chioma Eze',ini:'CE',e:'chiomae@gmail.com',coins:5120,cash:5600,t:301,j:'Aug 21',b:false},
+  {n:'Musa Ibrahim',ini:'MI',e:'musa.i@yahoo.com',coins:310,cash:1280,t:44,j:'Oct 18',b:false},
+  {n:'Bot Account 77',ini:'B7',e:'xx7781@temp-mail.io',coins:9800,cash:0,t:980,j:'Nov 5',b:true},
+  {n:'Blessing Udo',ini:'BU',e:'blessu@gmail.com',coins:1540,cash:900,t:120,j:'Oct 2',b:false},
+  {n:'Kelechi Obi',ini:'KO',e:'kelobi@yahoo.com',coins:60,cash:200,t:12,j:'Nov 4',b:false},
+ ],
+ ads:{banner:true,inter:true,native:true,social:false,smart:true,freq:3},
+};
+const APAGES=[['dash','chart','Dashboard'],['tasks','list','Tasks'],['subs','image','Submissions'],['payouts','wallet','Payouts'],['users','users','Users'],['ads','ad','Adsterra ads'],['settings','settings','Settings']];
+
+function adminShell(){
+ if(S.adm==='login')return `<div class="alogin"><div class="card" style="width:100%;max-width:400px;padding:30px">
+  <div class="row"><div class="logo" style="width:42px;height:42px;border-radius:12px;font-size:20px">E</div><div><b style="font-size:17px">Enro Admin</b><div class="sm">Staff access only</div></div></div>
+  <div class="h2 mt24">Sign in</div>
+  <div class="mt16"><div class="field"><label>Email</label><div class="inp">${ic('mail',18)}<input value="admin@enro.app"></div></div>
+  <div class="field"><label>Password</label><div class="inp">${ic('lock',18)}<input type="password" value="••••••••••"></div></div>
+  <div class="field"><label>2FA code</label><div class="inp">${ic('shield',18)}<input value="482 913"></div></div>
+  <button class="btn mt8" onclick="S.adm='in';render()">Sign in to dashboard</button></div></div></div>`;
+ const pend=AD.subs.filter(x=>x.s==='pend').length,pp=AD.payouts.filter(x=>x.s==='pend').length;
+ return `<div class="adm"><nav class="side"><div class="lg"><div class="logo">E</div><b>Enro Admin</b></div>
+  ${APAGES.map(([k,i,l])=>`<button class="${S.apage===k?'on':''}" onclick="S.apage='${k}';render()" title="${l}">${ic(i,19)}<span>${l}</span>${k==='subs'&&pend?`<em class="n">${pend}</em>`:k==='payouts'&&pp?`<em class="n">${pp}</em>`:''}</button>`).join('')}
+  <div style="flex:1"></div><button onclick="S.adm='login';render()">${ic('logout',19)}<span>Log out</span></button></nav>
+  <main class="main">${A[S.apage]()}</main></div>
+  ${S.modal?taskModal():''}`;
+}
+const tb=(title,right='')=>`<div class="atop"><div class="h1">${title}</div>${right}</div>`;
+const st=s=>`<span class="pill ${s}">${{ok:'Approved',pend:'Pending',bad:'Rejected',paid:'Paid'}[s]}</span>`;
+
+const A={
+dash:()=>{
+ const days=[['Fri',12.1],['Sat',14.8],['Sun',16.2],['Mon',13.4],['Tue',17.9],['Wed',19.3],['Thu',18.9]],mx=20;
+ return tb('Dashboard',`<span class="sm">Thu, 6 Nov 2026</span>`)+`
+ <div class="kpis">
+  ${[['Total users','12,480','+3.2% this week','users'],['Active today','3,214','+8.1%','eye'],['Tasks completed today','18,902','+5.4%','check'],['Pending payouts',N(184500),pendCount()+' requests','wallet'],['Adsterra revenue (7d)','$412.60','+12% vs last week','ad'],['Coins issued today','412,300','≈ ₦41,230','coin']]
+   .map(([l,v,d,i])=>`<div class="kpi"><div class="between"><small>${l}</small><span style="color:var(--p)">${ic(i,17)}</span></div><b>${v}</b><em>${d}</em></div>`).join('')}
+ </div>
+ <div class="grid2">
+  <div class="card"><div class="between"><div class="h3">Tasks completed (thousands)</div><span class="sm">Last 7 days</span></div>
+   <svg viewBox="0 0 420 200" width="100%" style="margin-top:12px">
+    ${[0,5,10,15,20].map(v=>{const y=170-v/mx*150;return `<line x1="30" x2="415" y1="${y}" y2="${y}" stroke="#EEECF4"/><text x="22" y="${y+4}" font-size="10" fill="#9A97AC" text-anchor="end">${v}k</text>`}).join('')}
+    ${days.map(([d,v],i)=>{const h=v/mx*150,x=44+i*53;return `<rect x="${x}" y="${170-h}" width="30" height="${h}" rx="5" fill="${i===6?'#5B3DF5':'#C9BEFF'}"/><text x="${x+15}" y="188" font-size="11" fill="#6D6A80" text-anchor="middle">${d}</text>`}).join('')}
+   </svg></div>
+  <div class="card"><div class="h3">Needs attention</div>
+   <div class="list mt8">
+    ${[['image','Special task proofs to review',AD.subs.filter(x=>x.s==='pend').length,'subs','p'],['phone','Airtime/data requests',AD.payouts.filter(x=>x.s==='pend'&&x.kind==='airtime').length,'payouts','g'],['bank','Cash withdrawals',AD.payouts.filter(x=>x.s==='pend'&&x.kind==='cash').length,'payouts','c'],['ban','Flagged accounts (fraud)',3,'users','r']]
+     .map(([i,t,n,to,c])=>`<button class="it" style="width:100%;text-align:left" onclick="S.apage='${to}';render()"><div class="ico ${c}" style="width:38px;height:38px">${ic(i,18)}</div><div class="t"><b style="font-weight:600">${t}</b></div><b>${n}</b>${ic('chev',16)}</button>`).join('')}
+   </div></div>
+ </div>
+ <div class="grid2">
+  <div class="card"><div class="h3">Top tasks today</div><div class="list mt8">${AD.tasks.slice(0,4).map(t=>`<div class="it"><div class="ico p" style="width:36px;height:36px">${ic(t.icon,17)}</div><div class="t"><b style="font-weight:600">${t.title}</b></div><span class="sm">${fmt(t.comp)} done</span></div>`).join('')}</div></div>
+  <div class="card"><div class="h3">Payout split (this month)</div>
+   <div class="mt16">${[['Airtime','₦412,000',46,'var(--gold)'],['Data','₦198,500',22,'var(--p)'],['Cash','₦286,000',32,'var(--cash)']].map(([l,v,p,c])=>`<div style="margin-bottom:14px"><div class="between sm"><b style="color:var(--ink)">${l}</b><span>${v} · ${p}%</span></div><div class="bar mt8" style="height:8px"><i style="width:${p}%;background:${c}"></i></div></div>`).join('')}</div></div>
+ </div>`},
+
+tasks:()=>{
+ const sp=S.atab==='special',list=sp?AD.special:AD.tasks;
+ return tb('Tasks',`<button class="btn sm" onclick="S.modal=true;render()">${ic('plus',16)} New task</button>`)+`
+ <div class="atabs"><button class="${!sp?'on':''}" onclick="S.atab='tasks';render()">Tasks (coins) · ${AD.tasks.length}</button><button class="${sp?'on':''}" onclick="S.atab='special';render()">Special tasks (cash) · ${AD.special.length}</button></div>
+ <div class="tblw"><table class="tbl"><thead><tr><th>Task</th><th>${sp?'Slots':'Type'}</th><th>Reward</th><th>Completions</th><th>Active</th><th></th></tr></thead><tbody>
+ ${list.map((t,i)=>`<tr><td><div class="u"><div class="ico ${sp?'c':'p'}" style="width:36px;height:36px;border-radius:10px">${ic(t.icon,17)}</div><b style="font-weight:600">${t.title}</b></div></td>
+  <td>${sp?`${fmt(t.taken)} / ${fmt(t.slots)}`:`<span class="pill pur">${t.type}</span>`}</td>
+  <td>${sp?`<span class="pill cash">${N(t.reward)}</span>`:`<span class="pill coin">${t.reward} coins</span>`}</td>
+  <td>${fmt(t.comp)}</td>
+  <td><button class="sw ${t.on?'on':''}" onclick="AD.${sp?'special':'tasks'}[${i}].on=!AD.${sp?'special':'tasks'}[${i}].on;render()"></button></td>
+  <td><div class="acts"><button class="ab">${ic('edit',14)} Edit</button></div></td></tr>`).join('')}
+ </tbody></table></div>`},
+
+subs:()=>tb('Special task submissions',`<span class="sm">${AD.subs.filter(x=>x.s==='pend').length} waiting · review within 24h</span>`)+`
+ <div class="tblw"><table class="tbl"><thead><tr><th>User</th><th>Task</th><th>Proof</th><th>Reward</th><th>Submitted</th><th>Status</th><th></th></tr></thead><tbody>
+ ${AD.subs.map((x,i)=>`<tr><td><div class="u"><div class="av">${x.ini}</div><b style="font-weight:600">${x.u}</b></div></td><td style="max-width:240px">${x.task}</td>
+  <td><div class="row" style="gap:8px"><div class="thumb">${ic('image',18)}</div><span class="sm">${x.note}</span></div></td>
+  <td><span class="pill cash">${N(x.r)}</span></td><td class="sm">${x.when}</td><td>${st(x.s)}</td>
+  <td>${x.s==='pend'?`<div class="acts"><button class="ab ok" onclick="AD.subs[${i}].s='ok';render();atoast('Approved · ${N(x.r)} credited to ${x.u}')">${ic('check',14)} Approve</button><button class="ab no" onclick="AD.subs[${i}].s='bad';render();atoast('Rejected · user notified')">${ic('x',14)} Reject</button></div>`:''}</td></tr>`).join('')}
+ </tbody></table></div>`,
+
+payouts:()=>{
+ const air=S.ptab==='airtime',list=AD.payouts.map((p,i)=>({...p,i})).filter(p=>p.kind===(air?'airtime':'cash'));
+ return tb('Payouts',`<span class="sm">Pending total: ${N(184500)}</span>`)+`
+ <div class="atabs"><button class="${air?'on':''}" onclick="S.ptab='airtime';render()">Airtime & data (coins)</button><button class="${!air?'on':''}" onclick="S.ptab='cash';render()">Cash withdrawals</button></div>
+ ${air?`<div class="card row" style="margin-bottom:14px;background:var(--goldl);border-color:#F8E3A8"><span style="color:var(--amber)">${ic('phone',20)}</span><div style="flex:1"><b style="font-size:14px">Auto-fulfil via VTU provider</b><div class="sm">When on, airtime/data is sent instantly through your VTU API and only failures land here.</div></div><button class="sw on" onclick="this.classList.toggle('on')"></button></div>`
+ :`<div class="card row" style="margin-bottom:14px;background:var(--cashl);border-color:#BDEBD3"><span style="color:var(--cash)">${ic('bank',20)}</span><div style="flex:1"><b style="font-size:14px">Bank transfers via Paystack / Flutterwave</b><div class="sm">Approving sends the transfer. Check the user's history for fraud before paying.</div></div></div>`}
+ <div class="tblw"><table class="tbl"><thead><tr><th>User</th><th>${air?'Network / phone':'Bank / account'}</th><th>Amount</th><th>${air?'Cost':'Fee'}</th><th>Status</th><th></th></tr></thead><tbody>
+ ${list.map(p=>`<tr><td><div class="u"><div class="av">${p.ini}</div><b style="font-weight:600">${p.u}</b></div></td><td>${p.det}</td><td><b>${p.amt}</b></td><td class="sm">${p.cost}</td><td>${st(p.s==='ok'?'paid':p.s)}</td>
+  <td>${p.s==='pend'?`<div class="acts"><button class="ab ok" onclick="AD.payouts[${p.i}].s='ok';render();atoast('${air?'Sent':'Transfer initiated'} · ${p.amt} to ${p.u}')">${ic('check',14)} ${air?'Send':'Pay'}</button><button class="ab no" onclick="AD.payouts[${p.i}].s='bad';render();atoast('Rejected · balance refunded')">${ic('x',14)} Reject</button></div>`:''}</td></tr>`).join('')}
+ </tbody></table></div>`},
+
+users:()=>{
+ const q=S.usearch.toLowerCase(),list=AD.users.map((u,i)=>({...u,i})).filter(u=>!q||u.n.toLowerCase().includes(q)||u.e.includes(q));
+ return tb('Users',`<div class="inp" style="height:42px;width:260px;background:#fff">${ic('search',17)}<input placeholder="Search name or email" value="${S.usearch}" oninput="S.usearch=this.value;clearTimeout(window._us);window._us=setTimeout(()=>{render();const i=document.querySelector('.atop input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div>`)+`
+ <div class="tblw"><table class="tbl"><thead><tr><th>User</th><th>Coins</th><th>Cash</th><th>Tasks</th><th>Joined</th><th>Status</th><th></th></tr></thead><tbody>
+ ${list.map(u=>`<tr><td><div class="u"><div class="av">${u.ini}</div><div><b style="font-weight:600">${u.n}</b><div class="sm">${u.e}</div></div></div></td><td>${fmt(u.coins)}</td><td>${N(u.cash)}</td><td>${u.t}</td><td class="sm">${u.j}</td>
+  <td>${u.b?'<span class="pill bad">Banned</span>':'<span class="pill ok">Active</span>'}</td>
+  <td><div class="acts"><button class="ab">${ic('eye',14)} View</button><button class="ab ${u.b?'':'no'}" onclick="AD.users[${u.i}].b=!AD.users[${u.i}].b;render();atoast('${u.b?'User unbanned':'User banned'}')">${ic('ban',14)} ${u.b?'Unban':'Ban'}</button></div></td></tr>`).join('')}
+ </tbody></table></div>`},
+
+ads:()=>{
+ const a=AD.ads,row=(k,t,d,inp)=>`<div class="set"><div class="t"><b>${t}</b><span class="sm">${d}</span>${inp?`<input class="adinp mt8" placeholder="${inp}">`:''}</div><button class="sw ${a[k]?'on':''}" onclick="AD.ads.${k}=!AD.ads.${k};render()"></button></div>`;
+ return tb('Adsterra ads',`<button class="btn sm" onclick="atoast('Ad settings saved · app picks them up on next launch')">Save changes</button>`)+`
+ <div class="grid2" style="margin-top:0">
+  <div class="card">
+   ${row('banner','Banner 320×50','Home top, Task detail, Wallet bottom','Banner script / key')}
+   ${row('inter','Interstitial after task claim','Full-screen ad before coins are credited','Interstitial / Popunder key')}
+   ${row('native','Native banner in task list','Shown after every 3rd task card','Native banner key')}
+   ${row('smart','Smartlink for “Watch ad” tasks','Direct link opened inside the app for watch/visit tasks','https://www.example-smartlink.com/…')}
+   ${row('social','Social bar','Floating notification-style ad','Social bar key')}
+   <div class="set"><div class="t"><b>Interstitial frequency</b><span class="sm">Show 1 interstitial every N claimed tasks</span></div><input class="adinp" style="width:80px" type="number" value="${a.freq}" onchange="AD.ads.freq=this.value"></div>
+  </div>
+  <div>
+   <div class="card"><div class="h3">Last 7 days</div>
+    ${[['Impressions','184,220'],['Clicks','3,912'],['CTR','2.12%'],['eCPM','$2.24'],['Revenue','$412.60']].map(([l,v])=>`<div class="between" style="padding:9px 0;border-bottom:1px solid var(--line)"><span class="sub">${l}</span><b>${v}</b></div>`).join('')}
+    <p class="sm mt12">Pull these from the Adsterra Publisher API (stats endpoint) on a schedule.</p></div>
+   <div class="card mt16" style="background:var(--amberl);border-color:#F6DC9E"><div class="h3" style="color:var(--amber)">Note</div><p class="sm mt8" style="color:#7A5300;line-height:1.5">Adsterra has no official native Android/iOS SDK — in-app ads are shown through a WebView (banner/native code) or by opening Smartlinks. Keep the total ad budget per user sensible so rewards stay below ad revenue.</p></div>
+  </div>
+ </div>`},
+
+settings:()=>tb('Settings',`<button class="btn sm" onclick="atoast('Settings saved')">Save changes</button>`)+`
+ <div class="grid2" style="margin-top:0">
+  <div class="card"><div class="h3">Rewards & conversion</div>
+   ${[['Coins per ₦1 airtime','10'],['Minimum airtime redemption (₦)','100'],['Minimum cash withdrawal (₦)','1000'],['Withdrawal fee (₦)','50'],['Daily coin task limit per user','10'],['Referral bonus (coins, referrer / new user)','200 / 100'],['Referral unlock (tasks needed)','5'],['7-day streak bonus (coins)','100']]
+    .map(([l,v])=>`<div class="set"><div class="t"><b style="font-weight:600">${l}</b></div><input class="adinp" style="width:120px" value="${v}"></div>`).join('')}
+  </div>
+  <div>
+   <div class="card"><div class="h3">Providers</div>
+    <div class="field mt12"><label>VTU provider (airtime & data)</label><select class="adinp"><option>VTpass</option><option>Clubkonnect</option><option>Husmodata</option><option>Custom API</option></select></div>
+    <div class="field"><label>Bank payouts</label><select class="adinp"><option>Paystack Transfers</option><option>Flutterwave Transfers</option><option>Manual</option></select></div>
+    <div class="field" style="margin-bottom:0"><label>Support email</label><input class="adinp" value="support@enro.app"></div></div>
+   <div class="card mt16"><div class="h3">Anti-fraud</div>
+    ${[['One account per device',1],['Require phone OTP on sign-up',1],['Block VPN / emulator',1],['Auto-flag > 50 tasks/hour',1],['Hold first withdrawal for manual review',0]].map(([l,on])=>`<div class="set"><div class="t"><b style="font-weight:600">${l}</b></div><button class="sw ${on?'on':''}" onclick="this.classList.toggle('on')"></button></div>`).join('')}
+   </div>
+  </div>
+ </div>`,
+};
+function pendCount(){return AD.payouts.filter(x=>x.s==='pend').length}
+
+function taskModal(){
+ const sp=S.atab==='special';
+ return `<div class="modal" onclick="if(event.target===this){S.modal=false;render()}"><div class="in">
+  <div class="between"><div class="h2">New task</div><button class="back" onclick="S.modal=false;render()">${ic('x',18)}</button></div>
+  <div class="field mt16"><label>Category</label><div class="tabs"><button class="${!sp?'on':''}" onclick="S.atab='tasks';render()">Task · pays coins</button><button class="${sp?'on':''}" onclick="S.atab='special';render()">Special · pays cash</button></div></div>
+  <div class="field"><label>Title</label><input id="nt_title" class="adinp" placeholder="${sp?'e.g. Install & sign up on XYZ app':'e.g. Watch a 30-second video ad'}"></div>
+  <div class="f2">
+   <div class="field"><label>${sp?'Proof type':'Task type'}</label><select class="adinp" id="nt_type">${(sp?['Screenshot','Screenshot + code','Username/email']:['Watch','Visit','Social','Daily']).map(o=>`<option>${o}</option>`).join('')}</select></div>
+   <div class="field"><label>Reward (${sp?'₦ cash':'coins'})</label><input id="nt_reward" class="adinp" type="number" value="${sp?150:20}"></div>
+   <div class="field"><label>${sp?'Total slots':'Timer (seconds)'}</label><input class="adinp" type="number" value="${sp?500:30}"></div>
+   <div class="field"><label>${sp?'Expires':'Daily cap per user'}</label><input class="adinp" ${sp?'type="date" value="2026-12-06"':'type="number" value="1"'}></div>
+  </div>
+  <div class="field"><label>Task link</label><input class="adinp" placeholder="https://"></div>
+  <div class="field"><label>Instructions</label><textarea class="ta" placeholder="Step-by-step instructions shown to the user"></textarea></div>
+  <div class="row" style="justify-content:flex-end;gap:10px"><button class="ab" style="height:42px;padding:0 18px" onclick="S.modal=false;render()">Cancel</button><button class="ab pri" style="height:42px;padding:0 18px" onclick="saveTask()">Publish task</button></div>
+ </div></div>`}
+function saveTask(){
+ const sp=S.atab==='special',title=document.getElementById('nt_title').value||'Untitled task',r=Number(document.getElementById('nt_reward').value)||0,type=document.getElementById('nt_type').value;
+ if(sp)AD.special.unshift({id:Date.now(),title,reward:r,slots:500,taken:0,icon:'star',on:true,comp:0});
+ else AD.tasks.unshift({id:Date.now(),title,reward:r,type,icon:{Watch:'play',Visit:'link',Social:'users',Daily:'calendar'}[type],on:true,comp:0});
+ S.modal=false;render();atoast('Task published')}
+
+go('splash');
+</script>
+</body>
+</html>
