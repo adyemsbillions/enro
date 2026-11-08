@@ -27,7 +27,12 @@ if (is_post()) {
             flash('Task updated');
         } else {
             q('INSERT INTO tasks (title, description, type, url, reward_coins, duration_sec, daily_cap, sort, active) VALUES (?,?,?,?,?,?,?,?,?)', array_values($data));
-            flash('Task published');
+            $newId = (int)db()->lastInsertId();
+            if (post('notify') && $data['active']) {
+                broadcast_create('New task: +' . $data['reward_coins'] . ' coins 🎯', $data['title'], 'task', $newId, 'all', true, (int)admin()['id']);
+                broadcasts_process(15);
+            }
+            flash('Task published' . (post('notify') ? ' and users notified' : ''));
         }
         redirect('tasks.php');
     }
@@ -55,6 +60,7 @@ if ($edit || $new):
   <div class="field"><label>Sort order</label><input class="inp" type="number" name="sort" value="<?= (int)$t['sort'] ?>"></div>
   <div class="field"><label>&nbsp;</label><label class="chk"><input type="checkbox" name="active" value="1" <?= $t['active'] ? 'checked' : '' ?>> Active (visible in app)</label></div>
  </div>
+ <?php if (!$edit): ?><label class="chk" style="margin-bottom:16px"><input type="checkbox" name="notify" value="1" <?= setting('push_new_tasks', '1') === '1' ? 'checked' : '' ?>> Notify users (push + in-app)</label><?php endif ?>
  <button class="btn"><?= $edit ? 'Save changes' : 'Publish task' ?></button>
 </form>
 <?php else:

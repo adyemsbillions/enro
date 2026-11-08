@@ -23,7 +23,10 @@ require __DIR__ . '/wallet.php';
 require __DIR__ . '/services/Sms.php';
 require __DIR__ . '/services/Vtpass.php';
 require __DIR__ . '/services/Paystack.php';
+require __DIR__ . '/services/Push.php';
+require __DIR__ . '/migrate.php';
 require __DIR__ . '/actions.php';
+require __DIR__ . '/broadcasts.php';
 
 function config(string $key, $default = null)
 {

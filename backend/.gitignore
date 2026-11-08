@@ -4,3 +4,5 @@ storage/logs/*
 storage/cache/*
 !storage/**/.gitkeep
 storage/dev-admin.txt
+storage/firebase-service-account.json
+storage/*.json

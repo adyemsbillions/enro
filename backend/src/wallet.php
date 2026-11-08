@@ -37,7 +37,7 @@ function maybe_pay_referral(int $userId): void
     $newBonus = setting_int('ref_bonus_new', 100);
     if ($refBonus > 0) {
         ledger((int)$u['referred_by'], 'coin', $refBonus, 'referral', "Referral bonus — {$u['name']} joined", 'success', 'user', $userId);
-        notify((int)$u['referred_by'], 'Referral bonus', "{$u['name']} completed their first tasks. +$refBonus coins!", 'gift');
+        notify((int)$u['referred_by'], 'Referral bonus', "{$u['name']} completed their first tasks. +$refBonus coins!", 'gift', ['screen' => 'referral']);
     }
     if ($newBonus > 0) {
         ledger($userId, 'coin', $newBonus, 'referral', 'Referral welcome bonus', 'success', 'user', $userId);

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
+import { router, type Href } from 'expo-router';
+import { routeFor } from '@/lib/push';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { ago } from '@/lib/format';
@@ -11,6 +13,7 @@ import { Card, Empty, ErrorBox, Header, IconBox, Loading, Screen, Small, T, type
 const ICONS: Record<string, [IconName, 'cash' | 'gold' | 'p' | 'red']> = {
   check: ['checkmark-circle', 'cash'], phone: ['phone-portrait', 'gold'], bank: ['business', 'cash'], gift: ['gift', 'gold'],
   ban: ['close-circle', 'red'], wallet: ['wallet', 'p'], bell: ['notifications', 'p'], star: ['star', 'p'],
+  megaphone: ['megaphone', 'p'],
 };
 
 export default function Notifications() {
@@ -31,8 +34,9 @@ export default function Notifications() {
           <Card style={{ paddingVertical: 4 }}>
             {data.items.map((n, i) => {
               const [icon, tone] = ICONS[n.icon] ?? ICONS.bell;
+              const route = routeFor({ screen: n.screen ?? undefined, id: n.ref_id ?? undefined });
               return (
-                <Pressable key={n.id} style={{ flexDirection: 'row', gap: 12, paddingVertical: 13, borderBottomWidth: i === data.items.length - 1 ? 0 : 1, borderBottomColor: C.line }}>
+                <Pressable key={n.id} disabled={!route || route === '/notifications'} onPress={() => route && router.push(route as Href)} style={{ flexDirection: 'row', gap: 12, paddingVertical: 13, borderBottomWidth: i === data.items.length - 1 ? 0 : 1, borderBottomColor: C.line }}>
                   <IconBox name={icon} tone={tone} size={40} />
                   <View style={{ flex: 1 }}>
                     <T style={{ fontWeight: '700' }}>{n.title}</T>

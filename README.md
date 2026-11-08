@@ -47,21 +47,53 @@ While `debug` is `true` in `config.php`, OTP codes appear in the app ("Test mode
 
 ## Deploy the backend (cPanel / any PHP host)
 
-1. Create a MySQL database and user in cPanel.
-2. Upload the `backend/` folder and point a subdomain (e.g. `api.yourdomain.com`) at it. `.htaccess` routes `/api/*` and blocks private folders.
-3. Create `config.php` on the server with the live DB details, a new `jwt_secret`, `debug => false`, and `app_url` set to `https://api.yourdomain.com`.
-4. Run `php bin/install.php` and `php bin/create_admin.php …` (via cPanel Terminal, or import `database/schema.sql` + `seed.sql` in phpMyAdmin).
-5. **HTTPS is required.** Android blocks plain-HTTP API calls in release builds.
+Live backend: **https://enro.truszedproperties.com**. Full steps are in [`backend/DEPLOY.txt`](backend/DEPLOY.txt), which is also inside the zip.
 
-## Build the Android app
+1. Create a MySQL database and user in cPanel.
+2. Upload and extract the backend zip in the domain's folder.
+3. Open `/setup.php`. It writes `config.php` (debug off, random secret), creates the tables and creates your admin.
+4. Add the cron job `php …/bin/cron.php` every 5 minutes. It sends reminders and broadcasts.
+5. **Updates:** extract the new zip over the old files, then open `/setup.php` as admin → "Run database upgrade".
+
+Build the zip: `powershell -File backend/bin/make-zip.ps1` → `dist/enro-backend.zip`.
+
+## Push notifications
+
+- The backend sends straight to **Firebase Cloud Messaging**. No Expo account is needed for push.
+- **Automatic pushes:**
+  - proof approved/rejected, payout paid/refunded, referral bonus
+  - a morning "tasks ready" reminder
+  - an evening "check in / keep your streak" reminder
+  - new tasks, when "Notify users" is ticked
+  - admin messages from Admin → Notifications
+- **Without Firebase:** messages still show in the app's notification list, and the app schedules its own evening check-in reminder on the phone.
+
+To turn on Firebase:
+1. Firebase console → create a project → **add an Android app** with package `app.enro.mobile` → download `google-services.json` into `mobile/`. Then rebuild the APK.
+2. Project settings → Service accounts → **Generate new private key** → upload it as `backend/storage/firebase-service-account.json` on the server.
+
+## Build the Android APK
+
+Release builds are signed with Enro's own key in `mobile/credentials/`, which git ignores. **Back up that folder.** Every future APK update must be signed with the same key, or phones will refuse to install it over the old app.
+
+**Cloud build (recommended on a slow connection).** It uploads a few MB, builds on Expo's servers, and gives you a download link:
 
 ```bash
 cd mobile
-npx eas-cli@latest build -p android --profile preview    # APK you can install/share
-npx eas-cli@latest build -p android --profile production # AAB for Play Store
+npx eas-cli@latest login
+npx eas-cli@latest build -p android --profile preview
 ```
 
-Set `EXPO_PUBLIC_API_URL=https://api.yourdomain.com` for the build (in `eas.json` env or EAS environment variables).
+**Local build.** Needs Android Studio and roughly 2 GB of downloads the first time:
+
+```bash
+cd mobile
+npx expo prebuild -p android --clean
+cd android
+./gradlew assembleRelease     # → android/app/build/outputs/apk/release/app-release.apk
+```
+
+The API URL for builds is `https://enro.truszedproperties.com`. It's set in `eas.json` and `.env.production`.
 
 ---
 
@@ -70,7 +102,7 @@ Set `EXPO_PUBLIC_API_URL=https://api.yourdomain.com` for the build (in `eas.json
 - [ ] `debug => false` in `config.php` (otherwise OTP codes are exposed in API responses)
 - [ ] **Termii** API key + approved sender ID, so OTP SMS are actually sent
 - [ ] **VTpass** live keys + correct `variation_code` for every data plan (Admin → Data plans). Test in sandbox first.
-- [ ] **Paystack** secret key + the transfers feature enabled on your account. Webhook URL: `https://api.yourdomain.com/api/webhooks/paystack`
+- [ ] **Paystack** secret key + the transfers feature enabled on your account. Webhook URL: `https://enro.truszedproperties.com/api/webhooks/paystack`
 - [ ] Adsterra codes pasted in Admin → Adsterra ads; Smartlink set
 - [ ] Reward rates in Admin → Settings make sense vs. your Adsterra earnings per user
 - [ ] Remove the local test accounts, or reinstall on a clean database

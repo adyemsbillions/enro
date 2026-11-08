@@ -30,6 +30,8 @@ $routes = [
     ['POST', '/me/password',          'me_password'],
     ['GET',  '/notifications',        'notifications_list'],
     ['POST', '/notifications/read-all','notifications_read_all'],
+    ['POST', '/me/push-token',        'push_token_save'],
+    ['POST', '/me/push-token/remove', 'push_token_remove'],
     ['GET',  '/referrals',            'referrals_show'],
     ['GET',  '/transactions',         'transactions_list'],
     // coin tasks

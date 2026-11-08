@@ -168,3 +168,33 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   hits        INT NOT NULL DEFAULT 0,
   window_end  DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Push notifications (Firebase Cloud Messaging device tokens)
+CREATE TABLE IF NOT EXISTS push_tokens (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT UNSIGNED NOT NULL,
+  token       VARCHAR(255) NOT NULL UNIQUE,
+  platform    VARCHAR(10)  NOT NULL DEFAULT 'android',
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Messages from admin to many users (also shown in the in-app notification list)
+CREATE TABLE IF NOT EXISTS broadcasts (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title         VARCHAR(150) NOT NULL,
+  body          VARCHAR(500) NOT NULL,
+  screen        VARCHAR(30)  NULL,       -- where a tap opens: home, tasks, special, wallet, referral, task, special_task
+  ref_id        INT UNSIGNED NULL,
+  audience      ENUM('all','active7','active30') NOT NULL DEFAULT 'all',
+  push          TINYINT(1)   NOT NULL DEFAULT 1,
+  status        ENUM('queued','sending','sent') NOT NULL DEFAULT 'queued',
+  last_user_id  INT UNSIGNED NOT NULL DEFAULT 0,  -- send cursor
+  sent_count    INT          NOT NULL DEFAULT 0,
+  fail_count    INT          NOT NULL DEFAULT 0,
+  created_by    INT UNSIGNED NULL,
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  finished_at   DATETIME     NULL,
+  INDEX (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

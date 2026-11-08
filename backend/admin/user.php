@@ -16,13 +16,20 @@ if (is_post()) {
             q("UPDATE users SET status = 'active', ban_reason = NULL WHERE id = ?", [$id]);
             flash('User unbanned');
             break;
+        case 'testpush':
+            $n = (int)val('SELECT COUNT(*) FROM push_tokens WHERE user_id = ?', [$id]);
+            if (!Push::configured()) fail('Firebase is not connected yet (Admin → Notifications)');
+            if (!$n) fail('This user has no phone registered for notifications');
+            [$ok] = Push::send(array_column(rows('SELECT token FROM push_tokens WHERE user_id = ?', [$id]), 'token'), 'Test notification', 'Notifications are working 🎉', ['screen' => 'notifications']);
+            flash("Test sent to $ok of $n phone(s)");
+            break;
         case 'adjust':
             $amount = (int)post('amount');
             $cur = post('currency') === 'cash' ? 'cash' : 'coin';
             $reason = post('reason');
             if ($amount === 0 || $reason === '') fail('Enter a non-zero amount and a reason');
             tx(fn() => ledger($id, $cur, $amount, 'adjust', 'Adjustment: ' . $reason . ' (by ' . $admin['name'] . ')'));
-            notify($id, 'Balance updated', ($amount > 0 ? '+' : '') . ($cur === 'cash' ? naira($amount) : number_format($amount) . ' coins') . ": $reason", 'wallet');
+            notify($id, 'Balance updated', ($amount > 0 ? '+' : '') . ($cur === 'cash' ? naira($amount) : number_format($amount) . ' coins') . ": $reason", 'wallet', ['screen' => 'history']);
             flash('Balance adjusted');
             break;
     }
@@ -74,6 +81,10 @@ layout_start($u['name'], 'users');
    <?php endif ?>
    <?php if ($u['ban_reason']): ?><p class="sm mt12">Ban reason: <?= e($u['ban_reason']) ?></p><?php endif ?>
   </div>
+  <form method="post" class="card mt16"><?= csrf_field() ?>
+   <div class="between"><div><div class="h3">Push notifications</div><div class="sm mt8"><?= (int)val('SELECT COUNT(*) FROM push_tokens WHERE user_id = ?', [$id]) ?> phone(s) registered</div></div>
+   <button class="ab" name="action" value="testpush"><?= icon('send', 14) ?> Send test</button></div>
+  </form>
   <form method="post" class="card mt16"><?= csrf_field() ?>
    <div class="h3">Adjust balance</div><p class="sm mt8">Use a negative number to remove. The user is notified.</p>
    <div class="f2 mt12"><select class="inp" name="currency"><option value="coin">Coins</option><option value="cash">Cash (₦)</option></select><input class="inp" type="number" name="amount" placeholder="e.g. 500 or -500" required></div>

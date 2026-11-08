@@ -26,5 +26,9 @@ return [
     // Bank payouts + account name lookup (Paystack). Use sk_test_ while testing.
     'paystack' => ['secret_key' => ''],
 
+    // Push notifications: Firebase service account JSON (Firebase console → Project settings → Service accounts).
+    // Keep it inside storage/ (blocked from the web).
+    'fcm' => ['service_account_file' => __DIR__ . '/storage/firebase-service-account.json'],
+
     'upload_max_mb' => 5,
 ];

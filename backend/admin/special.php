@@ -28,7 +28,12 @@ if (is_post()) {
             flash('Special task updated');
         } else {
             q('INSERT INTO special_tasks (title, description, steps, url, reward_cash, proof_type, slots, eta, expires_at, active) VALUES (?,?,?,?,?,?,?,?,?,?)', array_values($data));
-            flash('Special task published');
+            $newId = (int)db()->lastInsertId();
+            if (post('notify') && $data['active']) {
+                broadcast_create('New cash task: earn ' . naira($data['reward_cash']) . ' 💰', $data['title'] . ' — only ' . number_format($data['slots']) . ' slots.', 'special_task', $newId, 'all', true, (int)admin()['id']);
+                broadcasts_process(15);
+            }
+            flash('Special task published' . (post('notify') ? ' and users notified' : ''));
         }
         redirect('special.php');
     }
@@ -56,6 +61,7 @@ if ($edit || $new):
   <div class="field"><label>&nbsp;</label><label class="chk"><input type="checkbox" name="active" value="1" <?= $t['active'] ? 'checked' : '' ?>> Active (visible in app)</label></div>
  </div>
  <p class="sm" style="margin:-4px 0 16px">Budget at full slots: <b><?= naira((int)$t['reward_cash'] * (int)$t['slots']) ?></b></p>
+ <?php if (!$edit): ?><label class="chk" style="margin-bottom:16px"><input type="checkbox" name="notify" value="1" <?= setting('push_new_tasks', '1') === '1' ? 'checked' : '' ?>> Notify users (push + in-app)</label><?php endif ?>
  <button class="btn"><?= $edit ? 'Save changes' : 'Publish special task' ?></button>
 </form>
 <?php else:

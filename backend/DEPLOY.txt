@@ -1,0 +1,47 @@
+ENRO BACKEND — DEPLOY TO enro.truszedproperties.com
+=====================================================
+
+FIRST INSTALL
+1. cPanel → MySQL® Databases:
+   - Create a database (e.g. youruser_enro)
+   - Create a user with a strong password
+   - Add the user to the database with ALL PRIVILEGES
+
+2. cPanel → File Manager → open the folder for enro.truszedproperties.com
+   (cPanel → Domains shows its "Document Root").
+   Upload this zip there and Extract it. The folder should then contain
+   admin/, api/, src/, setup.php, .htaccess ...
+   (Turn on "Show Hidden Files" in File Manager settings to see .htaccess.)
+
+3. Open https://enro.truszedproperties.com/setup.php
+   - Enter the database name, user and password from step 1
+   - Create your admin account
+   You land in the admin panel at https://enro.truszedproperties.com/admin/
+
+4. cPanel → Cron Jobs → add, "Once Per Five Minutes" (*/5 * * * *):
+     /usr/local/bin/php /home/YOUR_CPANEL_USER/PATH_TO_ENRO/bin/cron.php >/dev/null 2>&1
+   Use the real folder path from File Manager. This sends daily reminders and admin broadcasts.
+
+5. Check PHP version: cPanel → MultiPHP Manager → PHP 8.1 or newer (8.2+ recommended).
+
+PUSH NOTIFICATIONS (Firebase)
+- Firebase console → your project → Project settings → Service accounts → "Generate new private key".
+- Upload the downloaded file into the storage/ folder and rename it to:
+      firebase-service-account.json
+- Admin → Notifications should then stop showing "Firebase isn't connected".
+
+OTHER KEYS (edit config.php in File Manager)
+- termii.api_key        → real OTP SMS (until then OTP codes are only written to storage/logs/sms.log)
+- vtpass keys           → automatic airtime/data
+- paystack.secret_key   → bank account lookup + transfers
+  Paystack webhook URL: https://enro.truszedproperties.com/api/webhooks/paystack
+
+UPDATING LATER
+- Upload the new zip and extract over the old files (your config.php, uploads and logs are not in the zip,
+  so they are kept).
+- Then open https://enro.truszedproperties.com/setup.php while logged in as admin and click
+  "Run database upgrade".
+
+SECURITY NOTES
+- config.php and storage/ are blocked from the web by .htaccess — don't delete .htaccess files.
+- Keep "debug" => false in config.php on the live site.

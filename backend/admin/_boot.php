@@ -88,6 +88,7 @@ function icon(string $n, int $s = 18): string
         'ad' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l2-6 2 6M7.7 13h2.6M14 9v6h1.5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2z"/>',
         'wifi' => '<path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8"/>',
         'settings' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+        'bell' => '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/>',
         'logout' => '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h11"/>',
         'plus' => '<path d="M12 5v14M5 12h14"/>',
         'check' => '<path d="m5 12.5 4.5 4.5L19 7"/>',
@@ -139,6 +140,7 @@ function layout_start(string $title, string $page): void
         ['payouts.php', 'payouts', 'wallet', 'Payouts', $pendPay],
         ['users.php', 'users', 'users', 'Users', 0],
         ['plans.php', 'plans', 'wifi', 'Data plans', 0],
+        ['notifications.php', 'push', 'bell', 'Notifications', 0],
         ['ads.php', 'ads', 'ad', 'Adsterra ads', 0],
         ['settings.php', 'settings', 'settings', 'Settings', 0],
     ];

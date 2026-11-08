@@ -57,3 +57,10 @@ SELECT * FROM (
   SELECT 'airtel','1GB','7 days',2800,'airtel-1gb' UNION ALL SELECT 'airtel','2GB','30 days',5200,'airtel-2gb' UNION ALL
   SELECT '9mobile','1GB','7 days',2800,'9mobile-1gb'
 ) p WHERE NOT EXISTS (SELECT 1 FROM data_plans);
+
+INSERT IGNORE INTO settings (k, v) VALUES
+ ('push_morning_enabled','1'),
+ ('push_morning_hour','9'),
+ ('push_evening_enabled','1'),
+ ('push_evening_hour','19'),
+ ('push_new_tasks','1');

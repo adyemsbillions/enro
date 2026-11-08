@@ -11,7 +11,7 @@ function submission_approve(int $id, int $adminId): void
         q('UPDATE submissions SET status = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?', ['approved', $adminId, now(), $id]);
         q('UPDATE users SET cash = cash + ? WHERE id = ?', [(int)$s['reward_cash'], $s['user_id']]);
         set_ledger_status('submission', $id, 'success');
-        notify((int)$s['user_id'], 'Special task approved', '+' . naira($s['reward_cash']) . " added for “{$s['title']}”.", 'check');
+        notify((int)$s['user_id'], 'Special task approved', '+' . naira($s['reward_cash']) . " added for “{$s['title']}”.", 'check', ['screen' => 'wallet']);
     });
 }
 
@@ -23,7 +23,7 @@ function submission_reject(int $id, int $adminId, string $reason): void
         q('UPDATE submissions SET status = ?, reject_reason = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?', ['rejected', $reason, $adminId, now(), $id]);
         q('UPDATE special_tasks SET taken = GREATEST(taken - 1, 0) WHERE id = ?', [$s['special_task_id']]); // free the slot
         set_ledger_status('submission', $id, 'rejected');
-        notify((int)$s['user_id'], 'Proof rejected', "{$s['title']}: " . ($reason ?: 'your proof did not meet the requirements') . '. You can resubmit.', 'ban');
+        notify((int)$s['user_id'], 'Proof rejected', "{$s['title']}: " . ($reason ?: 'your proof did not meet the requirements') . '. You can resubmit.', 'ban', ['screen' => 'special_task', 'id' => (int)$s['special_task_id']]);
     });
 }
 
@@ -48,7 +48,7 @@ function payout_mark_paid(int $id, ?int $adminId, ?string $ref = null): void
         $msg = $p['kind'] === 'cash'
             ? naira($p['amount']) . " has been sent to {$p['bank_name']} •••• " . substr((string)$p['account_number'], -4) . '.'
             : payout_title($p) . " sent to {$p['phone']}.";
-        notify((int)$p['user_id'], $p['kind'] === 'cash' ? 'Withdrawal paid' : 'Top-up delivered', $msg, $p['kind'] === 'cash' ? 'bank' : 'phone');
+        notify((int)$p['user_id'], $p['kind'] === 'cash' ? 'Withdrawal paid' : 'Top-up delivered', $msg, $p['kind'] === 'cash' ? 'bank' : 'phone', ['screen' => 'history']);
     });
 }
 
@@ -65,7 +65,7 @@ function payout_refund(int $id, ?int $adminId, string $status, string $reason): 
         } else {
             ledger((int)$p['user_id'], 'coin', (int)$p['coins_cost'], 'refund', 'Refund: ' . payout_title($p), 'success', 'payout_refund', $id);
         }
-        notify((int)$p['user_id'], 'Request not completed', payout_title($p) . ' was ' . ($status === 'failed' ? 'unsuccessful' : 'declined') . ($reason ? ": $reason" : '') . '. Your balance has been refunded.', 'ban');
+        notify((int)$p['user_id'], 'Request not completed', payout_title($p) . ' was ' . ($status === 'failed' ? 'unsuccessful' : 'declined') . ($reason ? ": $reason" : '') . '. Your balance has been refunded.', 'ban', ['screen' => 'wallet']);
     });
 }
 

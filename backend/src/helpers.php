@@ -87,9 +87,13 @@ function client_ip(): string
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
-function notify(int $userId, string $title, string $body, string $icon = 'bell'): void
+/**
+ * In-app notification + phone push. $data says which screen a tap opens, e.g. ['screen' => 'history'].
+ */
+function notify(int $userId, string $title, string $body, string $icon = 'bell', array $data = []): void
 {
     q('INSERT INTO notifications (user_id, title, body, icon) VALUES (?, ?, ?, ?)', [$userId, $title, $body, $icon]);
+    queue_push($userId, $title, $body, $data ?: ['screen' => 'notifications']);
 }
 
 function e($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }

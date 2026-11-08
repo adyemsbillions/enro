@@ -44,6 +44,7 @@ function val(string $sql, array $params = [])
 function tx(callable $fn)
 {
     $pdo = db();
+    $queued = count($GLOBALS['push_queue'] ?? []);
     $pdo->beginTransaction();
     try {
         $result = $fn($pdo);
@@ -51,6 +52,8 @@ function tx(callable $fn)
         return $result;
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
+        // drop pushes for notifications that were rolled back
+        if (isset($GLOBALS['push_queue'])) $GLOBALS['push_queue'] = array_slice($GLOBALS['push_queue'], 0, $queued);
         throw $e;
     }
 }

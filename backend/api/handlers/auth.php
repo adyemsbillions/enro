@@ -88,7 +88,7 @@ function auth_verify_otp(): array
             q('UPDATE users SET phone_verified_at = ? WHERE id = ?', [now(), $user['id']]);
             $bonus = setting_int('welcome_bonus', 100);
             if ($bonus > 0) ledger((int)$user['id'], 'coin', $bonus, 'bonus', 'Welcome bonus');
-            notify((int)$user['id'], 'Welcome to Enro 🎉', "You got $bonus coins to start. Complete tasks to earn more.", 'gift');
+            notify((int)$user['id'], 'Welcome to Enro 🎉', "You got $bonus coins to start. Complete tasks to earn more.", 'gift', ['screen' => 'tasks']);
         }
     });
     $user = row('SELECT * FROM users WHERE id = ?', [$user['id']]);

@@ -38,6 +38,7 @@ export type AppConfig = {
   ref_unlock_tasks: number;
   streak_bonus: number;
   support_email: string;
+  push: { server: boolean; evening_hour: number; evening_enabled: boolean };
   ads: AdsConfig;
 };
 
@@ -81,7 +82,16 @@ export type Txn = {
   created_at: string;
 };
 
-export type Notice = { id: number; title: string; body: string; icon: string; read_at: string | null; created_at: string };
+export type Notice = {
+  id: number | string; // 'b12' = admin broadcast
+  title: string;
+  body: string;
+  icon: string;
+  read_at: string | null;
+  created_at: string;
+  screen: string | null;
+  ref_id: number | null;
+};
 
 export type WalletOptions = {
   networks: string[];

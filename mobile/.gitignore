@@ -41,3 +41,8 @@ yarn-error.*
 /android
 
 .env
+
+# release signing key + Firebase app config (keep private, back them up)
+credentials/
+credentials.json
+

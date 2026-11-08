@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "296196553255",
+    "project_id": "enro-1b2c1",
+    "storage_bucket": "enro-1b2c1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296196553255:android:6f6ff866e8921bb43a6c02",
+        "android_client_info": {
+          "package_name": "app.enro.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWQUwTz8uhVcYb_CJp4SoIbLKGyRK1i50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
