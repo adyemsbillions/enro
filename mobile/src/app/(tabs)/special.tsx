@@ -24,6 +24,7 @@ export default function Special() {
   const [filter, setFilter] = useState<Filter>('available');
   const { data, error, refreshing, reload, loading } = useLoad(() => api<{ items: SpecialTask[]; unlocked: boolean; unlock_fee: number }>('/special-tasks'));
 
+  const locked = !!data && !data.unlocked && data.unlock_fee > 0;
   const items = (data?.items ?? []).filter((t) =>
     filter === 'available' ? (!t.my_status || t.my_status === 'rejected')
       : filter === 'pending' ? t.my_status === 'pending' : t.my_status === 'approved');
@@ -43,7 +44,7 @@ export default function Special() {
         </Row>
       </Card>
 
-      {data && !data.unlocked && data.unlock_fee > 0 && <View style={{ marginTop: 12 }}><UnlockCard fee={data.unlock_fee} onUnlocked={reload} /></View>}
+      {locked && <View style={{ marginTop: 12 }}><UnlockCard fee={data.unlock_fee} onUnlocked={reload} /></View>}
 
       <View style={{ marginVertical: 16 }}>
         <Chips<Filter> value={filter} onChange={setFilter} items={[['available', 'Available'], ['pending', 'Pending'], ['done', 'Completed']]} />
@@ -55,6 +56,7 @@ export default function Special() {
             title={filter === 'available' ? 'No special tasks right now' : filter === 'pending' ? 'Nothing waiting for review' : 'No completed special tasks yet'}
             text={filter === 'available' ? 'New paid tasks drop often. Turn on notifications so you don\'t miss them.' : undefined} />
         ) : items.map((t) => {
+          if (locked && !t.my_status) return <LockedCard key={t.id} />;
           const pct = (t.taken / Math.max(1, t.slots)) * 100;
           return (
             <Pressable key={t.id} onPress={() => router.push(`/special/${t.id}`)} style={({ pressed }) => [st.card, pressed && { opacity: 0.85 }]}>
@@ -80,6 +82,31 @@ export default function Special() {
   );
 }
 
+/** A task the user hasn't paid to see yet: nothing real is shown, only blurred-out shapes and a lock. */
+function LockedCard() {
+  return (
+    <View style={st.card}>
+      <View style={{ opacity: 0.55 }}>
+        <Row>
+          <View style={[st.blur, { width: 44, height: 44, borderRadius: 13 }]} />
+          <View style={{ flex: 1, gap: 8 }}>
+            <View style={[st.blur, { height: 13, width: '82%' }]} />
+            <View style={[st.blur, { height: 10, width: '48%' }]} />
+          </View>
+          <View style={[st.blur, { width: 62, height: 26, borderRadius: 13 }]} />
+        </Row>
+        <View style={[st.blur, { height: 8, marginTop: 16 }]} />
+      </View>
+      <View style={st.lock}>
+        <View style={st.lockPill}><Icon name="lock-closed" size={13} color={C.white} /><T style={{ color: C.white, fontWeight: '700', fontSize: 12 }}>Locked</T></View>
+      </View>
+    </View>
+  );
+}
+
 const st = StyleSheet.create({
+  blur: { backgroundColor: '#DCD9EA', borderRadius: 6 },
+  lock: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  lockPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(22,20,31,.78)', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20 },
   card: { backgroundColor: C.white, borderWidth: 1, borderColor: C.line, borderRadius: 16, padding: 14, marginBottom: 10 },
 });

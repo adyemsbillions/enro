@@ -12,6 +12,17 @@ function special_public(array $t): array
     ];
 }
 
+/** Until the unlock fee is paid nothing about a task is sent to the phone (except tasks they already submitted). */
+function special_masked(array $t): array
+{
+    if (!empty($t['my_status'])) return special_public($t);
+    return [
+        'id' => (int)$t['id'], 'title' => 'Unlock to view this task', 'description' => '', 'steps' => [], 'url' => null,
+        'reward' => 0, 'proof_type' => 'text', 'slots' => 1, 'taken' => 0, 'eta' => null, 'expires_at' => null,
+        'my_status' => null, 'reject_reason' => null, 'locked' => true,
+    ];
+}
+
 function special_list(): array
 {
     $u = auth_user();
@@ -22,7 +33,7 @@ function special_list(): array
          WHERE t.active = 1 AND (t.expires_at IS NULL OR t.expires_at >= CURDATE())
            AND (t.taken < t.slots OR s.id IS NOT NULL)
          ORDER BY (s.id IS NULL) DESC, t.id DESC', [$u['id']]);
-    return ['items' => array_map('special_public', $items)] + unlock_state($u);
+    return ['items' => array_map(user_unlocked($u) ? 'special_public' : 'special_masked', $items)] + unlock_state($u);
 }
 
 function special_show(int $id): array
@@ -31,7 +42,7 @@ function special_show(int $id): array
     $t = row('SELECT t.*, s.status my_status, s.reject_reason FROM special_tasks t
               LEFT JOIN submissions s ON s.special_task_id = t.id AND s.user_id = ? WHERE t.id = ?', [$u['id'], $id]);
     if (!$t) fail('Task not found', 404);
-    return ['task' => special_public($t)] + unlock_state($u);
+    return ['task' => user_unlocked($u) ? special_public($t) : special_masked($t)] + unlock_state($u);
 }
 
 function special_submit(int $id): array

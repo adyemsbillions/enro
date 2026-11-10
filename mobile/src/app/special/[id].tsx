@@ -24,12 +24,20 @@ export default function SpecialDetail() {
   const [err, setErr] = useState<string | null>(null);
 
   const t = data?.task;
+  const locked = data?.unlocked === false && data.unlock_fee > 0;
   if (!t) return <Screen header={<Header title="Special task" />}>{error ? <ErrorBox message={error} onRetry={reload} /> : <Loading />}</Screen>;
+
+  if (locked && !t.my_status) {
+    return (
+      <Screen header={<Header title="Special task" />}>
+        <UnlockCard fee={data.unlock_fee} onUnlocked={reload} />
+      </Screen>
+    );
+  }
 
   const needsImage = t.proof_type !== 'text';
   const needsText = t.proof_type !== 'screenshot';
   const canSubmit = (!needsImage || proof) && (!needsText || note.trim().length > 0);
-  const locked = data.unlocked === false && data.unlock_fee > 0;
   const open = !locked && (!t.my_status || t.my_status === 'rejected');
 
   const pick = async () => {
