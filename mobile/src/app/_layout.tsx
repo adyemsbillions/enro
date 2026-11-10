@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/lib/auth';
 import { ToastProvider } from '@/components/toast';
 import { PushManager } from '@/components/PushManager';
+import { UpdateManager } from '@/components/UpdateManager';
 import { C } from '@/lib/theme';
 
 export default function RootLayout() {
@@ -17,6 +18,8 @@ export default function RootLayout() {
             <Stack.Screen name="index" options={{ animation: 'fade' }} />
             <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
           </Stack>
+          {/* after the Stack so the "new version" bar floats above every screen */}
+          <UpdateManager />
         </ToastProvider>
       </AuthProvider>
     </SafeAreaProvider>

@@ -18,11 +18,9 @@ export type Me = {
   stats: { tasks_done: number; special_done: number; total_cashout: number };
 };
 
+/** Adsterra Smartlink only: shown full-screen after every `every` task claims, and opened by "Watch ad" tasks. */
 export type AdsConfig = {
-  banner: { enabled: boolean; html: string };
-  interstitial: { enabled: boolean; html: string; every: number };
-  native: { enabled: boolean; html: string };
-  socialbar: { enabled: boolean; html: string };
+  interstitial: { enabled: boolean; every: number };
   smartlink: string;
 };
 

@@ -17,8 +17,7 @@ return [
     'jwt_secret' => 'CHANGE_ME',
     'jwt_ttl_days' => 30,
 
-    // SMS for OTP (Termii). Leave api_key empty to only log codes (debug).
-    'termii' => ['api_key' => '', 'sender_id' => 'Enro'],
+    // Email (verification codes) is set up in Admin → Settings → Email, not here.
 
     // Airtime/data (VTpass). sandbox: https://sandbox.vtpass.com/api  live: https://vtpass.com/api
     'vtpass' => ['base_url' => 'https://sandbox.vtpass.com/api', 'api_key' => '', 'secret_key' => '', 'public_key' => ''],

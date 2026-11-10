@@ -10,7 +10,7 @@ require __DIR__ . '/handlers/wallet.php';
 require __DIR__ . '/handlers/webhooks.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Authorization, Content-Type');
+header('Access-Control-Allow-Headers: Authorization, X-Auth-Token, Content-Type');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -72,13 +72,28 @@ try {
 }
 
 /* ---------- auth guard ---------- */
+
+/**
+ * The login token from the request. Many cPanel/PHP-FPM hosts strip the Authorization header,
+ * so also look in the places servers move it to, and in X-Auth-Token (which the app always sends too).
+ */
+function request_token(): ?string
+{
+    $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if ($hdr === '' && function_exists('getallheaders')) {
+        foreach (getallheaders() as $k => $v) {
+            if (strcasecmp($k, 'Authorization') === 0) $hdr = (string)$v;
+        }
+    }
+    if (preg_match('/Bearer\s+(\S+)/i', $hdr, $m)) return $m[1];
+    $alt = trim((string)($_SERVER['HTTP_X_AUTH_TOKEN'] ?? ''));
+    return $alt !== '' ? $alt : null;
+}
 function auth_user(): array
 {
     static $user = null;
     if ($user) return $user;
-    $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-    if (!preg_match('/Bearer\s+(.+)/i', $hdr, $m)) fail('Please log in', 401);
-    $payload = jwt_decode(trim($m[1]));
+    $payload = jwt_decode(request_token() ?? fail('Please log in', 401));
     if (!$payload) fail('Session expired. Please log in again.', 401);
     $user = row('SELECT * FROM users WHERE id = ?', [(int)$payload['sub']]);
     if (!$user) fail('Account not found', 401);

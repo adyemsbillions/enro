@@ -41,7 +41,7 @@ npx expo start
 - Press `w` for a browser preview. Ads and WebViews only show as placeholders on web.
 - **Expo Go vs. dev build:** `react-native-webview` is included in Expo Go, so Expo Go works for testing. For release, build with EAS (see below).
 
-While `debug` is `true` in `config.php`, OTP codes appear in the app ("Test mode: your code is …") and in `backend/storage/logs/sms.log`, so you can test without SMS.
+While `debug` is `true` in `config.php`, verification codes appear in the app ("Test mode: your code is …") and in `backend/storage/logs/mail.log`, so you can test without a mail server.
 
 ---
 
@@ -93,14 +93,38 @@ cd android
 ./gradlew assembleRelease     # → android/app/build/outputs/apk/release/app-release.apk
 ```
 
-The API URL for builds is `https://enro.truszedproperties.com`. It's set in `eas.json` and `.env.production`.
+The API URL for builds is `https://enro.truszedproperties.com`. It's set in `eas.json`, `.env.production` and the EAS environment variable `EXPO_PUBLIC_API_URL`.
+
+## Ship app updates without a new APK (OTA)
+
+Builds now include **EAS Update**. Changes to screens, text, logic, colours or images go straight to installed phones:
+
+```bash
+cd mobile
+npm run update -- --message "Fix wallet text"
+```
+
+- Phones download the update in the background. It applies the next time the app opens, or when the user comes back after 5+ minutes away.
+- The update uses the same server URL as the build.
+
+**When you still need a new APK:**
+- adding a package with native code
+- changing permissions, the app icon or splash, `app.json` plugins, or `google-services.json`
+
+For those, raise `version` in `app.json` (e.g. 1.0.0 → 1.1.0) and build again. Updates only reach APKs with the same version, so an update never lands on an APK that's missing the native parts it needs.
+
+## Email verification codes
+
+Sign-up and password-reset codes are emailed with **PHPMailer** (bundled in `backend/lib/PHPMailer`, v7.1.1). Configure it in **Admin → Settings → Email**:
+- **Hosting mail:** works with no setup, but often lands in spam.
+- **SMTP (recommended):** create a mailbox like `no-reply@truszedproperties.com` in cPanel → Email Accounts. Its "Connect Devices" page shows the host, port (465 SSL) and username.
 
 ---
 
 ## Go-live checklist
 
-- [ ] `debug => false` in `config.php` (otherwise OTP codes are exposed in API responses)
-- [ ] **Termii** API key + approved sender ID, so OTP SMS are actually sent
+- [ ] `debug => false` in `config.php` (otherwise verification codes are exposed in API responses)
+- [ ] **Email**: set up SMTP in Admin → Settings, press **Send test**, and check it lands in the inbox, not spam
 - [ ] **VTpass** live keys + correct `variation_code` for every data plan (Admin → Data plans). Test in sandbox first.
 - [ ] **Paystack** secret key + the transfers feature enabled on your account. Webhook URL: `https://enro.truszedproperties.com/api/webhooks/paystack`
 - [ ] Adsterra codes pasted in Admin → Adsterra ads; Smartlink set

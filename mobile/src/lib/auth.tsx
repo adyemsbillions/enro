@@ -11,8 +11,7 @@ const DEFAULT_CONFIG: AppConfig = {
   app_name: 'Enro', coins_per_naira: 10, airtime_amounts: [100, 200, 500, 1000], min_withdraw: 1000, withdraw_fee: 50,
   daily_task_limit: 10, ref_bonus_referrer: 200, ref_bonus_new: 100, ref_unlock_tasks: 5, streak_bonus: 100, support_email: '',
   push: { server: false, evening_hour: 19, evening_enabled: true },
-  ads: { banner: { enabled: false, html: '' }, interstitial: { enabled: false, html: '', every: 3 }, native: { enabled: false, html: '' },
-         socialbar: { enabled: false, html: '' }, smartlink: '' },
+  ads: { interstitial: { enabled: false, every: 3 }, smartlink: '' },
 };
 
 type AuthCtx = {

@@ -37,7 +37,10 @@ type Options = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; for
 export async function api<T = any>(path: string, opts: Options = {}): Promise<T> {
   if (!opts.boot) await ready;
   const headers: Record<string, string> = { Accept: 'application/json' };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+    headers['X-Auth-Token'] = token; // some hosts strip Authorization; this one always gets through
+  }
   let body: BodyInit | undefined;
   if (opts.form) {
     body = opts.form as unknown as BodyInit;

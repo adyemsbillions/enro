@@ -18,10 +18,10 @@ export default function Signup() {
     if (!agree) return setError('Please accept the Terms to continue');
     setLoading(true);
     try {
-      const r = await api<{ user_id: number; phone: string; debug_otp?: string }>('/auth/register', {
+      const r = await api<{ user_id: number; sent_to: string; debug_otp?: string }>('/auth/register', {
         body: { ...f, device_id: await deviceId() },
       });
-      router.push({ pathname: '/otp', params: { user_id: String(r.user_id), phone: r.phone, debug: r.debug_otp ?? '' } });
+      router.push({ pathname: '/otp', params: { user_id: String(r.user_id), to: r.sent_to, debug: r.debug_otp ?? '' } });
     } catch (e) {
       setError(errMsg(e));
     } finally {

@@ -17,6 +17,7 @@ function run_migrations(PDO $pdo): array
     // Columns added after the first release
     $columns = [
         ['users', 'broadcasts_read_at', 'DATETIME NULL'],
+        ['users', 'email_verified_at', 'DATETIME NULL'],
         ['users', 'last_morning_push', 'DATE NULL'],
         ['users', 'last_evening_push', 'DATE NULL'],
     ];

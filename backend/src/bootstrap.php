@@ -20,7 +20,7 @@ require __DIR__ . '/db.php';
 require __DIR__ . '/jwt.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/wallet.php';
-require __DIR__ . '/services/Sms.php';
+require __DIR__ . '/services/Mailer.php';
 require __DIR__ . '/services/Vtpass.php';
 require __DIR__ . '/services/Paystack.php';
 require __DIR__ . '/services/Push.php';

@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/auth';
 import { fmt, greeting, naira } from '@/lib/format';
 import type { Task } from '@/lib/types';
 import { C } from '@/lib/theme';
-import { AdBanner } from '@/components/ads';
 import { TaskCard } from '@/components/TaskCard';
 import { Avatar, Card, H2, Icon, IconBtn, Pill, Row, Screen, Small, T } from '@/components/ui';
 
@@ -90,8 +89,6 @@ export default function Home() {
           })}
         </View>
       </Card>
-
-      <AdBanner />
 
       <H2 style={{ fontSize: 17, marginTop: 8 }}>Choose how to earn</H2>
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>

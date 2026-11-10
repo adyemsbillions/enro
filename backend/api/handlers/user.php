@@ -22,12 +22,14 @@ function app_config(): array
             'evening_hour' => (int)($s['push_evening_hour'] ?? 19),
             'evening_enabled' => ($s['push_evening_enabled'] ?? '1') === '1',
         ],
+        // Adsterra Smartlink only. banner/native/socialbar stay in the response, always off,
+        // because app versions from before this change still read them.
         'ads' => [
-            'banner'       => ['enabled' => $on('ads_banner_enabled'), 'html' => $s['ads_banner_html'] ?? ''],
-            'interstitial' => ['enabled' => $on('ads_interstitial_enabled'), 'html' => $s['ads_interstitial_html'] ?? '', 'every' => max(1, (int)($s['ads_interstitial_freq'] ?? 3))],
-            'native'       => ['enabled' => $on('ads_native_enabled'), 'html' => $s['ads_native_html'] ?? ''],
-            'socialbar'    => ['enabled' => $on('ads_socialbar_enabled'), 'html' => $s['ads_socialbar_html'] ?? ''],
+            'interstitial' => ['enabled' => $on('ads_interstitial_enabled') && !empty($s['ads_smartlink_url']), 'html' => '', 'every' => max(1, (int)($s['ads_interstitial_freq'] ?? 3))],
             'smartlink'    => $s['ads_smartlink_url'] ?? '',
+            'banner'       => ['enabled' => false, 'html' => ''],
+            'native'       => ['enabled' => false, 'html' => ''],
+            'socialbar'    => ['enabled' => false, 'html' => ''],
         ],
     ];
 }

@@ -72,7 +72,7 @@ layout_start($u['name'], 'users');
   <div class="card">
    <div class="h3">Details</div>
    <?php foreach ([
-       'Email' => e($u['email']), 'Phone' => e($u['phone']) . ($u['phone_verified_at'] ? ' ✓' : ' (unverified)'),
+       'Email' => e($u['email']) . ($u['email_verified_at'] || $u['phone_verified_at'] ? ' ✓' : ' (unverified)'), 'Phone' => e($u['phone']),
        'Referral code' => e($u['referral_code']), 'Referred by' => $ref ? '<a style="color:var(--p)" href="user.php?id=' . $ref['id'] . '">' . e($ref['name']) . '</a>' : '—',
        'Joined' => date('M j, Y', strtotime($u['created_at'])), 'Last seen' => $u['last_seen_at'] ? ago($u['last_seen_at']) : '—',
    ] as $l => $v): ?><div class="set"><div class="t sm"><?= $l ?></div><div><?= $v ?></div></div><?php endforeach ?>

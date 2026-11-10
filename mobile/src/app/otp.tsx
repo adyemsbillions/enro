@@ -9,7 +9,7 @@ import { C } from '@/lib/theme';
 
 /** Phone verification (sign-up) and password reset both use this screen. mode=reset adds a new-password field. */
 export default function Otp() {
-  const { user_id, phone, debug, mode } = useLocalSearchParams<{ user_id: string; phone: string; debug?: string; mode?: string }>();
+  const { user_id, to, debug, mode } = useLocalSearchParams<{ user_id: string; to: string; debug?: string; mode?: string }>();
   const { signIn } = useAuth();
   const toast = useToast();
   const [code, setCode] = useState('');
@@ -58,9 +58,9 @@ export default function Otp() {
 
   return (
     <Screen header={<Header title="" />}>
-      <IconBox name="shield-checkmark" size={64} />
-      <H1 style={{ marginTop: 20 }}>{reset ? 'Reset your password' : 'Verify your number'}</H1>
-      <Sub style={{ marginTop: 6 }}>Enter the 6-digit code we sent to <T style={{ fontWeight: '700' }}>{phone}</T></Sub>
+      <IconBox name="mail-open" size={64} />
+      <H1 style={{ marginTop: 20 }}>{reset ? 'Reset your password' : 'Check your email'}</H1>
+      <Sub style={{ marginTop: 6 }}>Enter the 6-digit code we emailed to <T style={{ fontWeight: '700' }}>{to}</T>. Can’t find it? Check your spam folder.</Sub>
       {devCode ? <Small style={{ marginTop: 8, color: C.amber }}>Test mode: your code is {devCode}</Small> : null}
 
       <Pressable onPress={() => input.current?.focus()} style={st.boxes}>

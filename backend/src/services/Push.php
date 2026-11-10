@@ -8,8 +8,8 @@ declare(strict_types=1);
  * Upload that JSON file as storage/firebase-service-account.json (storage/ is not web accessible),
  * or point config 'fcm.service_account_file' somewhere else.
  *
- * Messages are data-only, in the format expo-notifications expects, so the app shows them itself
- * and gets the "open this screen" data when the user taps.
+ * Messages carry a `notification` block (so Android shows them, and the app shows them while open)
+ * plus `data` in the format expo-notifications expects, so a tap opens the right screen.
  */
 final class Push
 {
@@ -106,10 +106,16 @@ final class Push
                 curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true, CURLOPT_TIMEOUT => 15,
                     CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $access, 'Content-Type: application/json'],
+                    // `notification` makes it show while the app is open too (expo-notifications drops data-only
+                    // messages in the foreground); `data` carries the screen to open when it's tapped.
                     CURLOPT_POSTFIELDS => json_encode(['message' => [
                         'token' => $tok,
+                        'notification' => ['title' => $title, 'body' => $body],
                         'data' => $payloadData,
-                        'android' => ['priority' => 'high'],
+                        'android' => [
+                            'priority' => 'high',
+                            'notification' => ['channel_id' => 'default', 'sound' => 'default', 'default_vibrate_timings' => true],
+                        ],
                     ]]),
                 ]);
                 curl_multi_add_handle($mh, $ch);

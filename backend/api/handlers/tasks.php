@@ -82,7 +82,7 @@ function tasks_claim(int $id): array
             'reward' => (int)$t['reward_coins'],
             'bonus' => $bonus,
             'coins' => (int)val('SELECT coins FROM users WHERE id = ?', [$u['id']]),
-            'show_interstitial' => setting('ads_interstitial_enabled') === '1' && $claimsToday % $every === 0,
+            'show_interstitial' => setting('ads_interstitial_enabled') === '1' && setting('ads_smartlink_url') && $claimsToday % $every === 0,
         ];
     });
 }

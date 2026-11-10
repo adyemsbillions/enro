@@ -64,3 +64,8 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('push_evening_enabled','1'),
  ('push_evening_hour','19'),
  ('push_new_tasks','1');
+
+INSERT IGNORE INTO settings (k, v) VALUES
+ ('mail_driver','mail'),
+ ('smtp_port','465'),
+ ('smtp_secure','ssl');

@@ -38,7 +38,6 @@ if (!is_file(BASE . '/config.php')) {
                 'db' => ['host' => $f['host'], 'port' => (int)$f['port'], 'name' => $f['name'], 'user' => $f['user'], 'pass' => $f['pass']],
                 'jwt_secret' => bin2hex(random_bytes(32)),
                 'jwt_ttl_days' => 30,
-                'termii' => ['api_key' => '', 'sender_id' => 'Enro'],
                 'vtpass' => ['base_url' => 'https://sandbox.vtpass.com/api', 'api_key' => '', 'secret_key' => '', 'public_key' => ''],
                 'paystack' => ['secret_key' => ''],
                 'fcm' => ['service_account_file' => BASE . '/storage/firebase-service-account.json'],

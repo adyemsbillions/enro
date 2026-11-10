@@ -12,7 +12,8 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://enro.truszedproperties.com"
       },
-      "credentialsSource": "local"
+      "credentialsSource": "local",
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
@@ -22,7 +23,8 @@
       "credentialsSource": "local",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {

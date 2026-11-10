@@ -104,3 +104,21 @@ function log_line(string $file, string $line): void
     @mkdir(STORAGE_PATH . '/logs', 0775, true);
     file_put_contents(STORAGE_PATH . "/logs/$file.log", '[' . now() . "] $line\n", FILE_APPEND);
 }
+
+/** Minimal JSON HTTP client using cURL. */
+function http_json(string $method, string $url, ?array $body = null, array $headers = []): array
+{
+    $ch = curl_init($url);
+    $h = array_merge(['Content-Type: application/json', 'Accept: application/json'], $headers);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => $method,
+        CURLOPT_HTTPHEADER     => $h,
+        CURLOPT_TIMEOUT        => 45,
+    ]);
+    if ($body !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+    $raw = curl_exec($ch);
+    $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = curl_error($ch);
+    return ['status' => $status, 'body' => $raw ? (json_decode($raw, true) ?? $raw) : null, 'error' => $err];
+}

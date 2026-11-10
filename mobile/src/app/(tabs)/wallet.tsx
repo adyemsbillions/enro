@@ -7,7 +7,6 @@ import { fmt, naira } from '@/lib/format';
 import { useLoad } from '@/lib/useLoad';
 import type { WalletOptions } from '@/lib/types';
 import { C, NETWORKS } from '@/lib/theme';
-import { AdBanner } from '@/components/ads';
 import { Button, Card, Chips, ErrorBox, ErrorNote, Field, H2, Header, Icon, IconBox, IconBtn, Loading, Row, Screen, Small, Sub, T, Tabs } from '@/components/ui';
 
 type Done = { icon: 'checkmark-circle' | 'time'; title: string; text: string };
@@ -135,7 +134,6 @@ function Redeem({ opts, onDone }: { opts: WalletOptions; onDone: (d: Done) => vo
         <Button title={sel ? (sel.coins > coins ? `Need ${fmt(sel.coins - coins)} more coins` : `Redeem for ${fmt(sel.coins)} coins`) : 'Choose an option'}
           onPress={redeem} loading={loading} disabled={!sel || sel.coins > coins || phone.replace(/\D/g, '').length < 10} />
       </View>
-      <AdBanner />
     </View>
   );
 }

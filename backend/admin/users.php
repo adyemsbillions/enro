@@ -12,7 +12,7 @@ if ($search !== '') {
     array_push($p, "%$search%", "%$search%", '%' . normalize_phone($search) . '%', strtoupper($search));
 }
 if ($filter === 'banned') $where[] = "u.status = 'banned'";
-if ($filter === 'unverified') $where[] = 'u.phone_verified_at IS NULL';
+if ($filter === 'unverified') $where[] = 'u.email_verified_at IS NULL AND u.phone_verified_at IS NULL';
 if ($filter === 'shared_device') $where[] = 'u.device_id IS NOT NULL AND (SELECT COUNT(*) FROM users d WHERE d.device_id = u.device_id) > 1';
 $w = implode(' AND ', $where);
 $total = (int)val("SELECT COUNT(*) FROM users u WHERE $w", $p);
@@ -24,7 +24,7 @@ layout_start('Users', 'users');
 <div class="atop"><h1>Users <span class="sm" style="font-size:14px;font-weight:500">· <?= number_format($total) ?></span></h1>
  <form class="search"><?= icon('search', 17) ?><input name="q" value="<?= e($search) ?>" placeholder="Name, email, phone or referral code"><input type="hidden" name="f" value="<?= e($filter) ?>"></form></div>
 <div class="atabs">
- <?php foreach (['all' => 'All', 'unverified' => 'Unverified phone', 'shared_device' => 'Shared device', 'banned' => 'Banned'] as $k => $l): ?>
+ <?php foreach (['all' => 'All', 'unverified' => 'Unverified', 'shared_device' => 'Shared device', 'banned' => 'Banned'] as $k => $l): ?>
   <a href="?f=<?= $k ?>&q=<?= urlencode($search) ?>" class="<?= $filter === $k ? 'on' : '' ?>"><?= $l ?></a>
  <?php endforeach ?>
 </div>
@@ -33,7 +33,7 @@ layout_start('Users', 'users');
 <?php foreach ($list as $u): ?>
  <tr style="cursor:pointer" onclick="location='user.php?id=<?= $u['id'] ?>'">
   <td><div class="u"><div class="av"><?= e(initials($u['name'])) ?></div><div><b style="font-weight:600"><?= e($u['name']) ?></b><div class="sm"><?= e($u['email']) ?></div></div></div></td>
-  <td><?= e($u['phone']) ?><?= $u['phone_verified_at'] ? '' : ' <span class="pill grey">unverified</span>' ?></td>
+  <td><?= e($u['phone']) ?><?= $u['email_verified_at'] || $u['phone_verified_at'] ? '' : ' <span class="pill grey">unverified</span>' ?></td>
   <td><?= number_format($u['coins']) ?></td><td><?= naira($u['cash']) ?></td><td><?= number_format($u['tasks']) ?></td>
   <td class="sm"><?= date('M j, Y', strtotime($u['created_at'])) ?></td>
   <td class="sm"><?= $u['last_seen_at'] ? ago($u['last_seen_at']) : '—' ?></td>

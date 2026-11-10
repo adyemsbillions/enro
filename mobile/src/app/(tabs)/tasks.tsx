@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -6,7 +6,6 @@ import { fmt } from '@/lib/format';
 import { useLoad } from '@/lib/useLoad';
 import type { Task } from '@/lib/types';
 import { C } from '@/lib/theme';
-import { AdNative } from '@/components/ads';
 import { TaskCard } from '@/components/TaskCard';
 import { Card, Chips, Empty, ErrorBox, Header, Loading, Pill, ProgressBar, Screen, Small, T } from '@/components/ui';
 
@@ -45,12 +44,7 @@ export default function Tasks() {
 
       {loading ? <Loading /> : error && !data ? <ErrorBox message={error} onRetry={reload} /> :
         items.length === 0 ? <Empty icon="checkmark-done-circle-outline" title="No tasks here right now" text="New tasks are added regularly. Pull down to refresh." /> :
-        items.map((t, i) => (
-          <Fragment key={t.id}>
-            <TaskCard task={t} />
-            {i === 2 && <AdNative />}
-          </Fragment>
-        ))}
+        items.map((t) => <TaskCard key={t.id} task={t} />)}
     </Screen>
   );
 }

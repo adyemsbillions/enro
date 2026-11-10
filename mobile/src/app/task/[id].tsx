@@ -6,7 +6,7 @@ import { api, errMsg } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import type { Task } from '@/lib/types';
 import { C } from '@/lib/theme';
-import { AdBanner, Interstitial } from '@/components/ads';
+import { SmartlinkAd, useSmartlinkAd } from '@/components/ads';
 import { TASK_ICON, TASK_LABEL } from '@/components/TaskCard';
 import { useToast } from '@/components/toast';
 import { Button, Card, ErrorBox, ErrorNote, H2, Header, IconBox, Loading, Pill, ProgressBar, Row, Screen, Sub, T } from '@/components/ui';
@@ -16,6 +16,7 @@ type Phase = 'idle' | 'running' | 'ready' | 'claiming' | 'done';
 export default function TaskDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { config, setBalances, refresh } = useAuth();
+  const adsOn = useSmartlinkAd();
   const toast = useToast();
   const [task, setTask] = useState<Task | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
@@ -84,7 +85,7 @@ export default function TaskDetail() {
         `/tasks/${task.id}/claim`, { body: { session_id: session.current.id } });
       setBalances({ coins: r.coins });
       pending.current = { reward: r.reward, bonus: r.bonus };
-      if (r.show_interstitial) setShowAd(true);
+      if (r.show_interstitial && adsOn) setShowAd(true);
       else finish();
     } catch (e) {
       setError(errMsg(e));
@@ -150,8 +151,7 @@ export default function TaskDetail() {
         )}
       </View>
 
-      <AdBanner style={{ marginTop: 16 }} />
-      <Interstitial visible={showAd} onClose={finish} />
+      <SmartlinkAd visible={showAd} onClose={finish} />
     </Screen>
   );
 }

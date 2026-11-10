@@ -12,8 +12,8 @@ export default function Forgot() {
     setError(null);
     setLoading(true);
     try {
-      const r = await api<{ user_id: number; phone: string; debug_otp?: string }>('/auth/forgot-password', { body: { login } });
-      router.push({ pathname: '/otp', params: { user_id: String(r.user_id), phone: r.phone, debug: r.debug_otp ?? '', mode: 'reset' } });
+      const r = await api<{ user_id: number; sent_to: string; debug_otp?: string }>('/auth/forgot-password', { body: { login } });
+      router.push({ pathname: '/otp', params: { user_id: String(r.user_id), to: r.sent_to, debug: r.debug_otp ?? '', mode: 'reset' } });
     } catch (e) {
       setError(errMsg(e));
     } finally {
@@ -24,7 +24,7 @@ export default function Forgot() {
   return (
     <Screen header={<Header title="" />}>
       <H1>Forgot password?</H1>
-      <Sub style={{ marginTop: 6, marginBottom: 22 }}>Enter your email or phone. We’ll text a code to your verified number.</Sub>
+      <Sub style={{ marginTop: 6, marginBottom: 22 }}>Enter your email or phone number. We’ll email you a code to reset your password.</Sub>
       {error && <ErrorNote text={error} />}
       <Field label="Email or phone" icon="mail-outline" value={login} onChangeText={setLogin} autoCapitalize="none" placeholder="you@email.com or 0803…" />
       <Button title="Send code" onPress={submit} loading={loading} disabled={!login} />

@@ -24,6 +24,11 @@ FIRST INSTALL
 
 5. Check PHP version: cPanel → MultiPHP Manager → PHP 8.1 or newer (8.2+ recommended).
 
+EMAIL (verification codes)
+- Admin → Settings → Email. Choose SMTP and enter a cPanel mailbox (cPanel → Email Accounts →
+  "Connect Devices" shows host, port and username), then press "Send test".
+- Without SMTP, the hosting's built-in mail is used. It works, but often lands in spam.
+
 PUSH NOTIFICATIONS (Firebase)
 - Firebase console → your project → Project settings → Service accounts → "Generate new private key".
 - Upload the downloaded file into the storage/ folder and rename it to:
@@ -31,7 +36,6 @@ PUSH NOTIFICATIONS (Firebase)
 - Admin → Notifications should then stop showing "Firebase isn't connected".
 
 OTHER KEYS (edit config.php in File Manager)
-- termii.api_key        → real OTP SMS (until then OTP codes are only written to storage/logs/sms.log)
 - vtpass keys           → automatic airtime/data
 - paystack.secret_key   → bank account lookup + transfers
   Paystack webhook URL: https://enro.truszedproperties.com/api/webhooks/paystack

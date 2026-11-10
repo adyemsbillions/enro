@@ -10,17 +10,44 @@ function public_user(array $u): array
     ];
 }
 
-function send_otp(array $user, string $purpose = 'verify'): ?string
+function is_verified(array $u): bool
+{
+    // phone_verified_at is from the earlier SMS version; either counts
+    return !empty($u['email_verified_at']) || !empty($u['phone_verified_at']);
+}
+
+/** a***e@gmail.com — shown where someone might be guessing at another person's account */
+function mask_email(string $email): string
+{
+    [$name, $domain] = explode('@', $email, 2) + [1 => ''];
+    $shown = mb_strlen($name) <= 2 ? mb_substr($name, 0, 1) : mb_substr($name, 0, 1) . str_repeat('*', 3) . mb_substr($name, -1);
+    return $shown . '@' . $domain;
+}
+
+/**
+ * Emails a fresh 6-digit code. Returns [sent, debugCode].
+ * The code is only returned in debug mode so you can test locally without a mail server.
+ */
+function send_otp(array $user, string $purpose = 'verify'): array
 {
     $code = (string)random_int(100000, 999999);
     q('UPDATE otp_codes SET used_at = ? WHERE user_id = ? AND used_at IS NULL', [now(), $user['id']]);
     q('INSERT INTO otp_codes (user_id, code_hash, expires_at) VALUES (?, ?, ?)',
       [$user['id'], password_hash($code, PASSWORD_DEFAULT), date('Y-m-d H:i:s', time() + 600)]);
-    $msg = $purpose === 'reset'
-        ? "Your Enro password reset code is $code. It expires in 10 minutes."
-        : "Your Enro verification code is $code. It expires in 10 minutes.";
-    Sms::send($user['phone'], $msg);
-    return config('debug') ? $code : null; // only exposed in debug, so you can test without SMS
+    [$subject, $html, $text] = code_email($code, $purpose);
+    $sent = Mailer::send($user['email'], $subject, $html, $text)['ok'];
+    if (config('debug')) log_line('mail', "code for {$user['email']}: $code");
+    return [$sent, config('debug') ? $code : null];
+}
+
+/** Common reply for every "we sent you a code" response. `phone` is kept for app builds from before email codes. */
+function otp_reply(array $user, array $otp, bool $mask): array
+{
+    $to = $mask ? mask_email($user['email']) : $user['email'];
+    return [
+        'need_otp' => true, 'user_id' => (int)$user['id'], 'channel' => 'email', 'sent_to' => $to,
+        'phone' => $to, 'email_sent' => $otp[0], 'debug_otp' => $otp[1],
+    ];
 }
 
 function check_otp(int $userId, string $code): void
@@ -71,8 +98,8 @@ function auth_register(): array
     q('INSERT INTO users (name, email, phone, password_hash, referral_code, referred_by, device_id) VALUES (?,?,?,?,?,?,?)',
       [$name, $email, $phone, password_hash($password, PASSWORD_DEFAULT), make_referral_code($name), $referrer, $device]);
     $user = row('SELECT * FROM users WHERE id = ?', [(int)db()->lastInsertId()]);
-    $otp = send_otp($user);
-    return ['user_id' => (int)$user['id'], 'phone' => $phone, 'need_otp' => true, 'debug_otp' => $otp];
+    // the account exists even if the email fails; the user can tap "Resend code"
+    return otp_reply($user, send_otp($user), false);
 }
 
 function auth_verify_otp(): array
@@ -84,8 +111,8 @@ function auth_verify_otp(): array
     check_otp((int)$user['id'], (string)in('code'));
 
     tx(function () use ($user) {
-        if (!$user['phone_verified_at']) {
-            q('UPDATE users SET phone_verified_at = ? WHERE id = ?', [now(), $user['id']]);
+        if (!is_verified($user)) {
+            q('UPDATE users SET email_verified_at = ? WHERE id = ?', [now(), $user['id']]);
             $bonus = setting_int('welcome_bonus', 100);
             if ($bonus > 0) ledger((int)$user['id'], 'coin', $bonus, 'bonus', 'Welcome bonus');
             notify((int)$user['id'], 'Welcome to Enro 🎉', "You got $bonus coins to start. Complete tasks to earn more.", 'gift', ['screen' => 'tasks']);
@@ -101,7 +128,9 @@ function auth_resend_otp(): array
     $user = row('SELECT * FROM users WHERE id = ?', [(int)in('user_id')]);
     if (!$user) fail('Account not found', 404);
     rate_limit('resend:' . $user['id'], 3, 600);
-    return ['ok' => true, 'debug_otp' => send_otp($user)];
+    $otp = send_otp($user);
+    if (!$otp[0] && !config('debug')) fail('We could not send the email right now. Please try again in a minute.', 503);
+    return ['ok' => true, 'sent_to' => mask_email($user['email']), 'debug_otp' => $otp[1]];
 }
 
 function find_user_by_login(string $login): ?array
@@ -119,8 +148,8 @@ function auth_login(): array
     if (!$user || !password_verify((string)in('password'), $user['password_hash'])) fail('Incorrect email/phone or password', 401);
     if ($user['status'] === 'banned') fail('Your account has been suspended.', 403, ['banned' => true]);
     if ($device = in('device_id')) q('UPDATE users SET device_id = COALESCE(device_id, ?) WHERE id = ?', [$device, $user['id']]);
-    if (!$user['phone_verified_at']) {
-        return ['need_otp' => true, 'user_id' => (int)$user['id'], 'phone' => $user['phone'], 'debug_otp' => send_otp($user)];
+    if (!is_verified($user)) {
+        return otp_reply($user, send_otp($user), true);
     }
     return ['token' => issue_token((int)$user['id']), 'user' => public_user($user)];
 }
@@ -131,7 +160,9 @@ function auth_forgot(): array
     rate_limit('forgot:' . client_ip(), 5, 900);
     $user = find_user_by_login((string)in('login'));
     if (!$user) fail('No account found with that email or phone', 404);
-    return ['user_id' => (int)$user['id'], 'phone' => $user['phone'], 'debug_otp' => send_otp($user, 'reset')];
+    $otp = send_otp($user, 'reset');
+    if (!$otp[0] && !config('debug')) fail('We could not send the email right now. Please try again in a minute.', 503);
+    return otp_reply($user, $otp, true);
 }
 
 function auth_reset(): array
@@ -141,7 +172,8 @@ function auth_reset(): array
     $uid = (int)in('user_id');
     rate_limit('otp:' . $uid, 10, 900);
     check_otp($uid, (string)in('code'));
-    q('UPDATE users SET password_hash = ?, phone_verified_at = COALESCE(phone_verified_at, ?) WHERE id = ?',
+    // a code that arrived by email proves the email address too
+    q('UPDATE users SET password_hash = ?, email_verified_at = COALESCE(email_verified_at, ?) WHERE id = ?',
       [password_hash((string)in('password'), PASSWORD_DEFAULT), now(), $uid]);
     $user = row('SELECT * FROM users WHERE id = ?', [$uid]);
     return ['token' => issue_token($uid), 'user' => public_user($user)];

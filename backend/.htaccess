@@ -2,11 +2,17 @@
 Options -Indexes
 RewriteEngine On
 
-# Pass the Authorization header through to PHP (needed for login tokens)
+# Pass the Authorization header through to PHP (needed for login tokens).
+# PHP-FPM/CGI hosts drop it otherwise; these are three ways of doing the same thing, for different server setups.
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
+RewriteCond %{HTTP:Authorization} .+
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+# (the app also sends the token as X-Auth-Token, which hosts never strip)
 
 # Never serve private files
-RewriteRule ^(config\.php|config\.example\.php|src/|storage/|database/|bin/) - [F,L]
+RewriteRule ^(config\.php|config\.example\.php|src/|storage/|database/|bin/|lib/) - [F,L]
 
 # /api/* -> api/index.php
 RewriteRule ^api(/.*)?$ api/index.php [L,QSA]

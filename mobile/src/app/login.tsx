@@ -8,7 +8,7 @@ import type { User } from '@/lib/types';
 import { Button, ErrorNote, Field, H1, Icon, Screen, Sub, T } from '@/components/ui';
 import { C } from '@/lib/theme';
 
-type LoginRes = { token?: string; user?: User; need_otp?: boolean; user_id?: number; phone?: string; debug_otp?: string };
+type LoginRes = { token?: string; user?: User; need_otp?: boolean; user_id?: number; sent_to?: string; debug_otp?: string };
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -26,7 +26,7 @@ export default function Login() {
     try {
       const r = await api<LoginRes>('/auth/login', { body: { login, password, device_id: await deviceId() } });
       if (r.need_otp) {
-        router.push({ pathname: '/otp', params: { user_id: String(r.user_id), phone: r.phone ?? '', debug: r.debug_otp ?? '' } });
+        router.push({ pathname: '/otp', params: { user_id: String(r.user_id), to: r.sent_to ?? '', debug: r.debug_otp ?? '' } });
       } else if (r.token) {
         await signIn(r.token);
         router.replace('/(tabs)');
