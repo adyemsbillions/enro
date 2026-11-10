@@ -8,6 +8,7 @@ if (is_post()) {
     switch (post('action')) {
         case 'vtu':    flash('VTpass: ' . payout_deliver_vtu($id, $aid)); break;
         case 'paystack': flash(payout_transfer_cash($id, $aid)); break;
+        case 'pscheck': flash('Paystack says: ' . payout_check_transfer($id)); break;
         case 'paid':   payout_mark_paid($id, $aid, post('ref') ?: null); flash('Marked as paid — user notified'); break;
         case 'reject': payout_refund($id, $aid, 'rejected', post('reason')); flash('Rejected — balance refunded'); break;
     }
@@ -42,7 +43,7 @@ layout_start('Payouts', 'payouts');
    : 'VTpass keys are not set in config.php. Top up the user from your own VTU platform, then click “Mark sent”.' ?></div>
 <?php else: ?>
  <div class="note" style="margin-bottom:14px"><?= $psReady
-   ? 'Paystack is connected. “Pay via Paystack” starts the transfer; it is marked paid automatically when Paystack confirms (set the webhook URL to ' . e(rtrim(config('app_url'), '/')) . '/api/webhooks/paystack).'
+   ? 'Paystack is connected. “Pay via Paystack” starts the transfer; it is marked paid automatically within a few minutes, once Paystack confirms it (or press “Check status”).'
    : 'Paystack key is not set. Transfer from your bank app, then click “Mark paid” and paste the reference.' ?>
    Check new accounts and first withdrawals carefully.</div>
 <?php endif ?>
@@ -65,6 +66,9 @@ layout_start('Payouts', 'payouts');
    <?php endif ?>
    <?php if ($p['status'] === 'pending' && $p['kind'] === 'cash' && $psReady): ?>
     <form method="post" data-confirm="Send <?= naira($p['amount']) ?> to <?= e($p['account_name']) ?> via Paystack?"><?= csrf_field() ?><input type="hidden" name="action" value="paystack"><input type="hidden" name="id" value="<?= $p['id'] ?>"><button class="ab pri"><?= icon('send', 14) ?> Pay via Paystack</button></form>
+   <?php endif ?>
+   <?php if ($p['status'] === 'processing' && $p['kind'] === 'cash' && $psReady && $p['provider_ref']): ?>
+    <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="pscheck"><input type="hidden" name="id" value="<?= $p['id'] ?>"><button class="ab">Check status</button></form>
    <?php endif ?>
    <form method="post" class="row" style="gap:6px" data-confirm="Mark this as <?= $p['kind'] === 'cash' ? 'paid' : 'sent' ?>? Only do this after the user has actually received it."><?= csrf_field() ?><input type="hidden" name="action" value="paid"><input type="hidden" name="id" value="<?= $p['id'] ?>">
     <input name="ref" class="inp" style="height:32px;width:110px;font-size:12.5px;padding:0 8px" placeholder="Reference"><button class="ab ok"><?= icon('check', 14) ?> Mark <?= $p['kind'] === 'cash' ? 'paid' : 'sent' ?></button></form>

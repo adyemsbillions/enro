@@ -69,3 +69,7 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('mail_driver','mail'),
  ('smtp_port','465'),
  ('smtp_secure','ssl');
+
+INSERT IGNORE INTO settings (k, v) VALUES
+ ('special_unlock_enabled','1'),
+ ('special_unlock_fee','1000');

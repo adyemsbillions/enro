@@ -9,6 +9,7 @@ import { useLoad } from '@/lib/useLoad';
 import type { SpecialTask } from '@/lib/types';
 import { C } from '@/lib/theme';
 import { useToast } from '@/components/toast';
+import { UnlockCard } from '@/components/UnlockCard';
 import { Button, Card, ErrorBox, ErrorNote, Header, Icon, IconBox, Loading, Pill, Row, Screen, Small, Sub, T } from '@/components/ui';
 
 type Picked = { uri: string; name: string; type: string };
@@ -16,7 +17,7 @@ type Picked = { uri: string; name: string; type: string };
 export default function SpecialDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
-  const { data, error, reload, setData } = useLoad(() => api<{ task: SpecialTask }>(`/special-tasks/${id}`));
+  const { data, error, reload, setData } = useLoad(() => api<{ task: SpecialTask; unlocked: boolean; unlock_fee: number }>(`/special-tasks/${id}`));
   const [proof, setProof] = useState<Picked | null>(null);
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
@@ -28,7 +29,8 @@ export default function SpecialDetail() {
   const needsImage = t.proof_type !== 'text';
   const needsText = t.proof_type !== 'screenshot';
   const canSubmit = (!needsImage || proof) && (!needsText || note.trim().length > 0);
-  const open = !t.my_status || t.my_status === 'rejected';
+  const locked = data.unlocked === false && data.unlock_fee > 0;
+  const open = !locked && (!t.my_status || t.my_status === 'rejected');
 
   const pick = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,7 +56,7 @@ export default function SpecialDetail() {
         }
       }
       await api(`/special-tasks/${t.id}/submit`, { method: 'POST', form });
-      setData({ task: { ...t, my_status: 'pending', reject_reason: null } });
+      setData({ ...data, task: { ...t, my_status: 'pending', reject_reason: null } });
       toast('Proof submitted for review');
     } catch (e) {
       setErr(errMsg(e));
@@ -79,6 +81,7 @@ export default function SpecialDetail() {
         {t.description ? <Sub style={{ marginTop: 12 }}>{t.description}</Sub> : null}
       </Card>
 
+      {locked && <View style={{ marginTop: 12 }}><UnlockCard fee={data.unlock_fee} onUnlocked={reload} /></View>}
       {t.my_status === 'pending' && (
         <StatusCard tone="amber" icon="time" title="Submitted — pending review" text={`We'll add ${naira(t.reward)} to your cash balance once approved, usually within 24 hours.`} />
       )}

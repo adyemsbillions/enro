@@ -15,6 +15,8 @@ export type Me = {
   tasks_today: number;
   daily_task_limit: number;
   unread_notifications: number;
+  special_unlocked: boolean;
+  special_unlock_fee: number;
   stats: { tasks_done: number; special_done: number; total_cashout: number };
 };
 

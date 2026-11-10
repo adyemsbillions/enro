@@ -1,14 +1,23 @@
+import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import { useAuth } from '@/lib/auth';
 import { naira } from '@/lib/format';
+import { bioEnabled, disableBio } from '@/lib/quickLogin';
 import { C } from '@/lib/theme';
 import { Avatar, Button, Card, Header, Icon, Row, Screen, Small, T, type IconName } from '@/components/ui';
 
 export default function Profile() {
   const { me, config, signOut } = useAuth();
   const u = me?.user;
+  const [bio, setBio] = useState(false);
+  useEffect(() => { bioEnabled().then(setBio).catch(() => {}); }, []);
+
+  const fingerprintOff = () => Alert.alert('Turn off fingerprint login?', 'You will log in with your password. You can turn it on again the next time you log in.', [
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'Turn off', style: 'destructive', onPress: () => void disableBio().then(() => setBio(false)) },
+  ]);
 
   const logout = () => {
     if (Platform.OS === 'web') return void signOut();
@@ -23,6 +32,7 @@ export default function Profile() {
     ['gift-outline', 'Refer & earn', u?.referral_code ?? '', () => router.push('/referral')],
     ['notifications-outline', 'Notifications', me?.unread_notifications ? `${me.unread_notifications} new` : '', () => router.push('/notifications')],
     ['lock-closed-outline', 'Change password', '', () => router.push('/password' as Href)],
+    ...(bio ? [['finger-print', 'Fingerprint login', 'On', fingerprintOff] as [IconName, string, string, () => void]] : []),
     ['help-circle-outline', 'Help & support', '', () => config.support_email && Linking.openURL(`mailto:${config.support_email}`)],
   ];
 

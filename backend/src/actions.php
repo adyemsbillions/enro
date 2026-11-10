@@ -82,7 +82,7 @@ function payout_deliver_vtu(int $id, ?int $adminId): string
     return 'Failed: ' . $r['message'];
 }
 
-/** Start a Paystack transfer. Final status arrives via the Paystack webhook. */
+/** Start a Paystack transfer. Its final status is checked with Paystack by the cron job (or the admin "Check status" button). */
 function payout_transfer_cash(int $id, int $adminId): string
 {
     $p = row('SELECT * FROM payouts WHERE id = ?', [$id]);
@@ -90,5 +90,28 @@ function payout_transfer_cash(int $id, int $adminId): string
     $r = Paystack::transfer($p);
     if (!$r['ok']) { q('UPDATE payouts SET admin_note = ? WHERE id = ?', [$r['message'], $id]); return 'Failed: ' . $r['message']; }
     q('UPDATE payouts SET status = ?, provider_ref = ?, processed_by = ? WHERE id = ?', ['processing', $r['ref'], $adminId, $id]);
-    return 'Transfer started — will be marked paid when Paystack confirms';
+    return 'Transfer started — it will be marked paid within a few minutes, once Paystack confirms';
+}
+
+/** Checks a processing Paystack transfer and marks the payout paid, or refunds it if the transfer failed. */
+function payout_check_transfer(int $id): string
+{
+    $p = row("SELECT * FROM payouts WHERE id = ? AND kind = 'cash'", [$id]);
+    if (!$p || $p['status'] !== 'processing' || !$p['provider_ref']) return 'not processing';
+    $st = Paystack::transferStatus($p['provider_ref']);
+    if ($st === 'success') { payout_mark_paid($id, null, $p['provider_ref']); return 'paid'; }
+    if ($st === 'failed' || $st === 'reversed') { payout_refund($id, null, 'failed', 'Bank transfer failed'); return 'failed — balance refunded'; }
+    return $st === 'unknown' ? 'could not reach Paystack' : 'still processing';
+}
+
+/** Cron: check Paystack transfers that are still processing. Returns a short report. */
+function payouts_check_processing(int $limit = 30): string
+{
+    if (!Paystack::configured()) return 'Paystack not configured';
+    $ids = array_column(rows("SELECT id FROM payouts WHERE kind = 'cash' AND status = 'processing' AND provider_ref IS NOT NULL AND provider_ref LIKE 'enro_wd_%' ORDER BY id LIMIT " . (int)$limit), 'id');
+    $done = 0;
+    foreach ($ids as $id) {
+        try { if (payout_check_transfer((int)$id) !== 'still processing') $done++; } catch (Throwable $e) { log_line('paystack', $e->getMessage()); }
+    }
+    return count($ids) . " checked, $done finished";
 }

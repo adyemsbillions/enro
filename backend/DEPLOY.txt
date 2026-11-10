@@ -38,7 +38,7 @@ PUSH NOTIFICATIONS (Firebase)
 OTHER KEYS (edit config.php in File Manager)
 - vtpass keys           → automatic airtime/data
 - paystack.secret_key   → bank account lookup + transfers
-  Paystack webhook URL: https://enro.truszedproperties.com/api/webhooks/paystack
+  (no webhook needed: the cron job confirms payments and transfers with Paystack)
 
 UPDATING LATER
 - Upload the new zip and extract over the old files (your config.php, uploads and logs are not in the zip,

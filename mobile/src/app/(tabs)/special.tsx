@@ -7,6 +7,7 @@ import { naira } from '@/lib/format';
 import { useLoad } from '@/lib/useLoad';
 import type { SpecialTask } from '@/lib/types';
 import { C } from '@/lib/theme';
+import { UnlockCard } from '@/components/UnlockCard';
 import { Card, Chips, Empty, ErrorBox, Header, Icon, IconBox, Loading, Pill, ProgressBar, Row, Screen, Small, T } from '@/components/ui';
 
 type Filter = 'available' | 'pending' | 'done';
@@ -21,7 +22,7 @@ function statusPill(t: SpecialTask) {
 export default function Special() {
   const { me, config } = useAuth();
   const [filter, setFilter] = useState<Filter>('available');
-  const { data, error, refreshing, reload, loading } = useLoad(() => api<{ items: SpecialTask[] }>('/special-tasks'));
+  const { data, error, refreshing, reload, loading } = useLoad(() => api<{ items: SpecialTask[]; unlocked: boolean; unlock_fee: number }>('/special-tasks'));
 
   const items = (data?.items ?? []).filter((t) =>
     filter === 'available' ? (!t.my_status || t.my_status === 'rejected')
@@ -41,6 +42,8 @@ export default function Special() {
           </View>
         </Row>
       </Card>
+
+      {data && !data.unlocked && data.unlock_fee > 0 && <View style={{ marginTop: 12 }}><UnlockCard fee={data.unlock_fee} onUnlocked={reload} /></View>}
 
       <View style={{ marginVertical: 16 }}>
         <Chips<Filter> value={filter} onChange={setFilter} items={[['available', 'Available'], ['pending', 'Pending'], ['done', 'Completed']]} />

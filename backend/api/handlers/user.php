@@ -44,6 +44,8 @@ function me_show(): array
         'tasks_today' => $doneToday,
         'daily_task_limit' => setting_int('daily_task_limit', 10),
         'unread_notifications' => unread_count($u),
+        'special_unlocked' => user_unlocked($u),
+        'special_unlock_fee' => unlock_required() ? unlock_fee() : 0,
         'stats' => [
             'tasks_done'   => (int)val('SELECT COUNT(*) FROM task_sessions WHERE user_id = ? AND claimed_at IS NOT NULL', [$u['id']]),
             'special_done' => (int)val("SELECT COUNT(*) FROM submissions WHERE user_id = ? AND status = 'approved'", [$u['id']]),

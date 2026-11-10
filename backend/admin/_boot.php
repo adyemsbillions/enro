@@ -138,6 +138,7 @@ function layout_start(string $title, string $page): void
         ['special.php', 'special', 'star', 'Special tasks', 0],
         ['submissions.php', 'subs', 'image', 'Submissions', $pendSubs],
         ['payouts.php', 'payouts', 'wallet', 'Payouts', $pendPay],
+        ['payments.php', 'payments', 'cash', 'Unlock fees', 0],
         ['users.php', 'users', 'users', 'Users', 0],
         ['plans.php', 'plans', 'wifi', 'Data plans', 0],
         ['notifications.php', 'push', 'bell', 'Notifications', 0],

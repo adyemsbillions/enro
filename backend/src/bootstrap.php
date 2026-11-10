@@ -27,6 +27,7 @@ require __DIR__ . '/services/Push.php';
 require __DIR__ . '/migrate.php';
 require __DIR__ . '/actions.php';
 require __DIR__ . '/broadcasts.php';
+require __DIR__ . '/unlock.php';
 
 function config(string $key, $default = null)
 {

@@ -6,7 +6,7 @@ $backend = Split-Path -Parent $PSScriptRoot
 Push-Location $backend
 try {
     $files = git ls-files -co --exclude-standard | Where-Object {
-        $_ -notin @('config.php', 'router.php') -and $_ -notlike 'storage/dev-admin*' -and $_ -notlike 'bin/make-zip.ps1'
+        $_ -notin @('config.php', 'router.php') -and $_ -notlike 'storage/dev-admin*' -and $_ -notlike 'bin/make-zip.ps1' -and (Test-Path $_)
     }
     $dist = Join-Path (Split-Path -Parent $backend) 'dist'
     New-Item -ItemType Directory -Force $dist | Out-Null

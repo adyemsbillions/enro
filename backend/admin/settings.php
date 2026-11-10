@@ -6,6 +6,7 @@ $numbers = [
     'coins_per_naira'    => ['Coins per ₦1', 'e.g. 10 means 1,000 coins = ₦100 airtime'],
     'airtime_amounts'    => ['Airtime amounts (₦)', 'Comma separated, e.g. 100,200,500,1000'],
     'min_withdraw'       => ['Minimum cash withdrawal (₦)', ''],
+    'special_unlock_fee' => ['Special tasks unlock fee (₦)', 'One-time Paystack payment before a user can do cash tasks'],
     'withdraw_fee'       => ['Withdrawal fee (₦)', 'Deducted on top of the amount'],
     'daily_task_limit'   => ['Coin tasks per user per day', 'Daily check-in not counted'],
     'welcome_bonus'      => ['Welcome bonus (coins)', 'After phone is verified'],
@@ -17,6 +18,7 @@ $numbers = [
 ];
 $toggles = [
     'one_account_per_device' => ['One account per device', 'Blocks sign-up when the device already has an account'],
+    'special_unlock_enabled' => ['Require the unlock fee for special tasks', 'Off = everyone can do special tasks for free'],
     'vtu_auto'               => ['Auto-send airtime & data', 'Deliver through VTpass instantly when users redeem (needs VTpass keys)'],
 ];
 

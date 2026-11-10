@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { api, ApiError, setApiReady, setApiToken, setOnUnauthorized } from './api';
 import { getItem, removeItem, setItem } from './storage';
 import { unregisterPush } from './push';
+import { rememberUser } from './quickLogin';
 import type { AppConfig, Me } from './types';
 
 const TOKEN_KEY = 'enro_token';
@@ -53,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(t);
     const data = await api<Me>('/me');
     setMe(data);
+    // so the login screen can greet them by name next time
+    await rememberUser({ name: data.user.name, login: data.user.email }).catch(() => {});
   }, []);
 
   const setBalances = useCallback((b: { coins?: number; cash?: number }) => {
@@ -66,8 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (saved) {
         setApiToken(saved);
         try {
-          setMe(await api<Me>('/me', { boot: true }));
+          const data = await api<Me>('/me', { boot: true });
+          setMe(data);
           setToken(saved);
+          rememberUser({ name: data.user.name, login: data.user.email }).catch(() => {});
         } catch (e) {
           if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
             await removeItem(TOKEN_KEY); // expired or banned: start at login

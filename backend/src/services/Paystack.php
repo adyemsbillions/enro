@@ -13,6 +13,41 @@ final class Paystack
         return http_json($method, self::BASE . $path, $body, ['Authorization: Bearer ' . config('paystack.secret_key')]);
     }
 
+    /**
+     * Start a checkout (card, bank transfer, USSD…). Returns the hosted payment page URL.
+     * https://paystack.com/docs/api/transaction/#initialize
+     * @return array{ok:bool, url:?string, message:string}
+     */
+    public static function initialize(string $email, int $amountNaira, string $reference, string $callbackUrl, array $metadata = []): array
+    {
+        if (!self::configured()) return ['ok' => false, 'url' => null, 'message' => 'Payments are not set up yet. Please try again later.'];
+        $res = self::call('POST', '/transaction/initialize', [
+            'email' => $email, 'amount' => $amountNaira * 100, 'currency' => 'NGN', 'reference' => $reference,
+            'callback_url' => $callbackUrl, 'metadata' => $metadata,
+        ]);
+        $url = $res['body']['data']['authorization_url'] ?? null;
+        if (!$url) log_line('paystack', 'initialize failed: ' . json_encode($res['body']));
+        return ['ok' => (bool)$url, 'url' => $url, 'message' => $url ? 'ok' : ($res['body']['message'] ?? 'Could not start payment')];
+    }
+
+    /**
+     * Ask Paystack what really happened with a payment (never trust the app or the redirect).
+     * https://paystack.com/docs/api/transaction/#verify
+     * @return array{paid:bool, amount_kobo:int, currency:string, id:?int, data:array}
+     */
+    public static function verify(string $reference): array
+    {
+        $res = self::call('GET', '/transaction/verify/' . rawurlencode($reference));
+        $d = is_array($res['body']['data'] ?? null) ? $res['body']['data'] : [];
+        return [
+            'paid' => ($d['status'] ?? '') === 'success',
+            'amount_kobo' => (int)($d['amount'] ?? 0),
+            'currency' => (string)($d['currency'] ?? ''),
+            'id' => isset($d['id']) ? (int)$d['id'] : null,
+            'data' => $d,
+        ];
+    }
+
     /** Fallback list used when Paystack isn't configured. Codes are Paystack/NIBSS bank codes. */
     public const FALLBACK_BANKS = [
         ['name' => 'Access Bank', 'code' => '044'], ['name' => 'First Bank of Nigeria', 'code' => '011'],
@@ -43,6 +78,19 @@ final class Paystack
         }
         $res = self::call('GET', '/bank/resolve?account_number=' . urlencode($account) . '&bank_code=' . urlencode($bankCode));
         return $res['body']['data']['account_name'] ?? null;
+    }
+
+    /**
+     * Ask Paystack what happened to a payout transfer.
+     * https://paystack.com/docs/api/transfer/#verify
+     * @return string success | failed | reversed | pending (anything not final) | unknown (could not reach Paystack)
+     */
+    public static function transferStatus(string $reference): string
+    {
+        $res = self::call('GET', '/transfer/verify/' . rawurlencode($reference));
+        $st = $res['body']['data']['status'] ?? null;
+        if (!is_string($st)) return 'unknown';
+        return in_array($st, ['success', 'failed', 'reversed'], true) ? $st : 'pending';
     }
 
     /** @return array{ok:bool, ref:?string, message:string} */

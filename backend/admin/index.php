@@ -13,6 +13,8 @@ $k = [
     'pend_count' => (int)val("SELECT COUNT(*) FROM payouts WHERE status IN ('pending','processing')"),
     'liab_coins' => (int)val('SELECT COALESCE(SUM(coins),0) FROM users'),
     'liab_cash'  => (int)val('SELECT COALESCE(SUM(cash),0) FROM users'),
+    'fees'       => (int)val("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status = 'paid'"),
+    'fees_n'     => (int)val("SELECT COUNT(*) FROM payments WHERE status = 'paid'"),
 ];
 $rate = max(1, setting_int('coins_per_naira', 10));
 
@@ -43,6 +45,7 @@ $splitTotal = max(1, array_sum(array_column($split, 0)));
  <div class="kpi"><small>Pending cash payouts</small><b><?= naira($k['pend_cash']) ?></b><em><?= $k['pend_count'] ?> open requests</em></div>
  <div class="kpi"><small>Coins held by users</small><b><?= number_format($k['liab_coins']) ?></b><em>≈ <?= naira(intdiv($k['liab_coins'], $rate)) ?> airtime owed</em></div>
  <div class="kpi"><small>Cash held by users</small><b><?= naira($k['liab_cash']) ?></b><em>withdrawable balance owed</em></div>
+ <div class="kpi"><small>Unlock fees received</small><b><?= naira($k['fees']) ?></b><em><?= number_format($k['fees_n']) ?> paid users</em></div>
 </div>
 
 <div class="grid2">

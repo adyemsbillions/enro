@@ -16,6 +16,14 @@ if (is_post()) {
             q("UPDATE users SET status = 'active', ban_reason = NULL WHERE id = ?", [$id]);
             flash('User unbanned');
             break;
+        case 'unlock':
+            unlock_user($id, 'An admin unlocked special tasks for you. You can now earn real cash.');
+            flash('Special tasks unlocked for this user');
+            break;
+        case 'lock':
+            q('UPDATE users SET special_unlocked_at = NULL WHERE id = ?', [$id]);
+            flash('Special tasks locked again for this user');
+            break;
         case 'testpush':
             $n = (int)val('SELECT COUNT(*) FROM push_tokens WHERE user_id = ?', [$id]);
             if (!Push::configured()) fail('Firebase is not connected yet (Admin → Notifications)');
@@ -81,6 +89,14 @@ layout_start($u['name'], 'users');
    <?php endif ?>
    <?php if ($u['ban_reason']): ?><p class="sm mt12">Ban reason: <?= e($u['ban_reason']) ?></p><?php endif ?>
   </div>
+  <?php $paid = row("SELECT * FROM payments WHERE user_id = ? AND purpose = 'special_unlock' AND status = 'paid' ORDER BY id DESC LIMIT 1", [$id]); ?>
+  <form method="post" class="card mt16"><?= csrf_field() ?>
+   <div class="between"><div><div class="h3">Special tasks</div><div class="sm mt8">
+    <?php if ($u['special_unlocked_at']): ?>Unlocked <?= e(ago($u['special_unlocked_at'])) ?><?= $paid ? ' · paid ' . naira($paid['amount']) . ' (' . e($paid['reference']) . ')' : ' · by admin' ?>
+    <?php else: ?>Locked<?= unlock_required() ? ' · fee ' . naira(unlock_fee()) : ' (fee switched off, so not needed)' ?><?php endif ?></div></div>
+   <?php if ($u['special_unlocked_at']): ?><button class="ab no" name="action" value="lock">Lock</button>
+   <?php else: ?><button class="ab ok" name="action" value="unlock">Unlock without payment</button><?php endif ?></div>
+  </form>
   <form method="post" class="card mt16"><?= csrf_field() ?>
    <div class="between"><div><div class="h3">Push notifications</div><div class="sm mt8"><?= (int)val('SELECT COUNT(*) FROM push_tokens WHERE user_id = ?', [$id]) ?> phone(s) registered</div></div>
    <button class="ab" name="action" value="testpush"><?= icon('send', 14) ?> Send test</button></div>

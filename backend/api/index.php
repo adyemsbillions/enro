@@ -7,7 +7,6 @@ require __DIR__ . '/handlers/user.php';
 require __DIR__ . '/handlers/tasks.php';
 require __DIR__ . '/handlers/special.php';
 require __DIR__ . '/handlers/wallet.php';
-require __DIR__ . '/handlers/webhooks.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, X-Auth-Token, Content-Type');
@@ -40,6 +39,8 @@ $routes = [
     ['POST', '/tasks/{id}/claim',     'tasks_claim'],
     // special tasks
     ['GET',  '/special-tasks',        'special_list'],
+    ['POST', '/special-tasks/unlock', 'unlock_init'],
+    ['POST', '/special-tasks/unlock/verify', 'unlock_verify'],
     ['GET',  '/special-tasks/{id}',   'special_show'],
     ['POST', '/special-tasks/{id}/submit', 'special_submit'],
     // wallet
@@ -47,8 +48,6 @@ $routes = [
     ['POST', '/wallet/redeem',        'wallet_redeem'],
     ['POST', '/wallet/resolve-account','wallet_resolve'],
     ['POST', '/wallet/withdraw',      'wallet_withdraw'],
-    // webhooks
-    ['POST', '/webhooks/paystack',    'webhook_paystack'],
 ];
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';

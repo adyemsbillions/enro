@@ -198,3 +198,18 @@ CREATE TABLE IF NOT EXISTS broadcasts (
   finished_at   DATETIME     NULL,
   INDEX (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Money users pay us (e.g. the one-time fee that unlocks special tasks), collected through Paystack
+CREATE TABLE IF NOT EXISTS payments (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id       INT UNSIGNED NOT NULL,
+  purpose       VARCHAR(30)  NOT NULL,            -- special_unlock
+  reference     VARCHAR(100) NOT NULL UNIQUE,
+  amount        INT          NOT NULL,            -- naira
+  status        ENUM('pending','paid','failed','abandoned') NOT NULL DEFAULT 'pending',
+  provider_id   BIGINT       NULL,                -- Paystack transaction id
+  channel       VARCHAR(30)  NULL,                -- card, bank_transfer, ussd…
+  paid_at       DATETIME     NULL,
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (user_id, purpose), INDEX (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

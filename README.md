@@ -126,7 +126,7 @@ Sign-up and password-reset codes are emailed with **PHPMailer** (bundled in `bac
 - [ ] `debug => false` in `config.php` (otherwise verification codes are exposed in API responses)
 - [ ] **Email**: set up SMTP in Admin → Settings, press **Send test**, and check it lands in the inbox, not spam
 - [ ] **VTpass** live keys + correct `variation_code` for every data plan (Admin → Data plans). Test in sandbox first.
-- [ ] **Paystack** secret key + the transfers feature enabled on your account. Webhook URL: `https://enro.truszedproperties.com/api/webhooks/paystack`
+- [ ] **Paystack** secret key + the transfers feature enabled on your account. No webhook needed: payments and transfers are confirmed by asking Paystack directly (app, admin and the cron job).
 - [ ] Adsterra codes pasted in Admin → Adsterra ads; Smartlink set
 - [ ] Reward rates in Admin → Settings make sense vs. your Adsterra earnings per user
 - [ ] Remove the local test accounts, or reinstall on a clean database
@@ -147,6 +147,6 @@ Logged-in endpoints need `Authorization: Bearer <token>`.
 | Tasks | `GET /tasks`, `POST /tasks/{id}/start`, `POST /tasks/{id}/claim` (server checks the timer and daily limits) |
 | Special | `GET /special-tasks`, `GET /special-tasks/{id}`, `POST /special-tasks/{id}/submit` (multipart `proof` + `note`) |
 | Wallet | `GET /wallet/options`, `POST /wallet/redeem`, `POST /wallet/resolve-account`, `POST /wallet/withdraw` |
-| Public | `GET /config` (rates + ad settings), `POST /webhooks/paystack` |
+| Public | `GET /config` (rates + ad settings) |
 
 Every balance change is written to the `transactions` ledger inside a database transaction. Rejected or failed payouts are refunded automatically.
