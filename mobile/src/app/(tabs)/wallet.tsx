@@ -203,8 +203,15 @@ function Withdraw({ opts, onDone }: { opts: WalletOptions; onDone: (d: Done) => 
           </View>} />
         <Field label="Amount" prefix="₦" value={amount} onChangeText={(v) => setAmount(v.replace(/\D/g, ''))} keyboardType="number-pad" placeholder="0"
           right={<Pressable onPress={() => setAmount(String(Math.max(0, cash - opts.withdraw_fee)))}><T style={{ color: C.p, fontWeight: '700', fontSize: 13 }}>Max</T></Pressable>}
-          hint={a > 0 ? <Small style={{ marginTop: 6, color: total > cash ? C.red : C.mut }}>Total deducted: {naira(total)}{total > cash ? ' — more than your balance' : ''}</Small> : null} />
+          hint={a > 0 ? (a < opts.min_withdraw
+            ? <Small style={{ marginTop: 6, color: C.red }}>Minimum withdrawal is {naira(opts.min_withdraw)}</Small>
+            : <Small style={{ marginTop: 6, color: total > cash ? C.red : C.mut }}>Total deducted: {naira(total)}{total > cash ? ' — more than your balance' : ''}</Small>) : null} />
       </View>
+      {cash < opts.min_withdraw + opts.withdraw_fee && (
+        <Small style={{ marginBottom: 12, textAlign: 'center' }}>
+          You need {naira(opts.min_withdraw + opts.withdraw_fee - cash)} more cash to withdraw. Special tasks pay cash.
+        </Small>
+      )}
 
       {error && <ErrorNote text={error} />}
       <Button title={a ? `Withdraw ${naira(a)}` : 'Withdraw'} variant="cash" onPress={withdraw} loading={loading} disabled={!valid} />

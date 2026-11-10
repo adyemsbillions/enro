@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Enro — ad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block" rel="stylesheet">
+<style>
+:root {
+  --ink: #17151F; --mut: #8B8798; --faint: #C4C0CC;
+  --p: #5B3DF5; --p2: #7A5CFF; --gold: #E2B04A; --cash: #0E9F62;
+  --cream-a: #F7F5F0; --cream-b: #ECE9E1; --cream-c: #E3DFD5;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0B0A1C; }
+body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+.scene { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+.cream { background: radial-gradient(ellipse 80% 75% at 46% 44%, var(--cream-a) 0%, var(--cream-b) 62%, var(--cream-c) 100%); }
+.dark { background: radial-gradient(ellipse 75% 70% at 48% 42%, #241E52 0%, #16123A 52%, #0B0A1C 100%); color: #fff; }
+.cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.abs { position: absolute; }
+.center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+em { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+.w { display: inline-block; white-space: pre; will-change: transform, opacity, filter; }
+
+.h { font-size: 74px; font-weight: 600; letter-spacing: -0.035em; line-height: 1.12; }
+.h em { font-size: 1.42em; color: var(--p); line-height: 0.9; }
+.dark .h em, .gold em { color: var(--gold); }
+.sub { font-size: 30px; font-weight: 500; color: var(--mut); letter-spacing: -0.01em; }
+
+/* S2 question stack */
+.q { font-size: 66px; font-weight: 700; letter-spacing: -0.035em; display: flex; align-items: center; gap: 26px; }
+.q .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--p); flex-shrink: 0; }
+
+/* numbered lists (S5, S7) */
+.item { display: grid; grid-template-columns: 92px 1fr; align-items: baseline; margin-bottom: 34px; }
+.item .n { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 52px; color: var(--faint); }
+.item .t { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; color: var(--faint); }
+.item .d { grid-column: 2; font-size: 26px; color: var(--mut); margin-top: 8px; line-height: 1.4; max-width: 640px; height: 0; overflow: hidden; }
+
+/* phone */
+.phone { position: absolute; width: 426px; height: 922px; border-radius: 66px; background: #0E0D13; padding: 13px;
+  box-shadow: 0 60px 120px -40px rgba(23, 16, 70, .55), 0 30px 50px -30px rgba(0,0,0,.4), inset 0 0 0 2px #2A2833; }
+.phone::before { content: ''; position: absolute; left: 50%; top: 24px; width: 118px; height: 32px; margin-left: -59px; border-radius: 20px; background: #050507; z-index: 5; }
+.screen { position: relative; width: 400px; height: 896px; border-radius: 54px; overflow: hidden; background: #F5F4FA; }
+.sb { position: absolute; top: 0; left: 0; right: 0; height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 6px 34px 0 40px; font: 600 16px 'Inter'; color: #17151F; z-index: 4; background: #F5F4FA; }
+.sb .ic { display: flex; gap: 6px; align-items: center; }
+.shotwrap { position: absolute; top: 44px; left: 0; width: 400px; height: 852px; overflow: hidden; }
+.shotwrap img { position: absolute; top: 0; left: 0; width: 400px; height: auto; }
+.tap { position: absolute; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgba(30, 24, 70, .18);
+  border: 3px solid rgba(255,255,255,.95); box-shadow: 0 4px 18px rgba(20,10,60,.35); z-index: 6; }
+
+/* floating UI cards cut from the real screens */
+.card { position: absolute; overflow: hidden; border-radius: 30px; background: #F5F4FA;
+  box-shadow: 0 50px 90px -40px rgba(30, 20, 80, .45), 0 18px 30px -18px rgba(20,10,60,.25), 0 0 0 1px rgba(20,10,60,.05); }
+.card img { position: absolute; }
+.pill { position: absolute; display: flex; align-items: center; gap: 14px; padding: 16px 24px 16px 18px; border-radius: 999px; background: #fff;
+  font: 600 25px 'Inter'; letter-spacing: -0.01em; color: var(--ink); white-space: nowrap;
+  box-shadow: 0 26px 50px -22px rgba(30,20,80,.45), 0 0 0 1px rgba(20,10,60,.05); z-index: 7; }
+.pill i { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 18px; color: #fff; }
+
+.chip { display: inline-block; padding: 14px 30px; border-radius: 999px; font: 600 28px 'Inter'; color: #fff;
+  background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18); }
+.chip.gold { color: #1A1500; background: var(--gold); box-shadow: none; }
+.logo { display: flex; align-items: center; gap: 30px; }
+.logo img { width: 132px; height: 132px; border-radius: 34px; box-shadow: 0 30px 60px -20px rgba(91,61,245,.6); }
+.logo b { font-size: 132px; font-weight: 800; letter-spacing: -0.055em; color: #fff; }
+
+#grain { position: absolute; inset: -50px; pointer-events: none; opacity: .055; mix-blend-mode: multiply; z-index: 100; }
+#fade { position: absolute; inset: 0; background: #000; opacity: 0; z-index: 101; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- S1 -->
+<section class="scene cream" id="s1"><div class="cam"><div class="center">
+  <div class="h" id="s1pre" style="position:absolute; top:490px; font-size:58px; color:var(--mut)">Let me ask you something.</div>
+  <div class="h words" id="s1a">How much did you spend on</div>
+  <div class="h words" id="s1b" style="margin-top:6px"><em>data</em> this month?</div>
+</div></div></section>
+
+<!-- S2 -->
+<section class="scene cream" id="s2"><div class="cam">
+  <div class="abs" style="left:150px; top:410px">
+    <div class="q" id="q1"><span class="dot"></span><span>Airtime finished before month end?</span></div>
+    <div class="q" id="q2" style="margin-top:38px"><span class="dot"></span><span>Right when you needed to make that call?</span></div>
+  </div>
+  <div class="card" id="c-net" data-src="wallet" data-crop="52,930,1066,262" data-w="480" style="left:1360px; top:170px"></div>
+  <div class="card" id="c-bal" data-src="home" data-crop="52,185,1066,535" data-w="470" style="left:1390px; top:660px"></div>
+</div></section>
+
+<!-- S2b -->
+<section class="scene cream" id="s2b"><div class="cam"><div class="center">
+  <div class="h words" id="s2ba" style="font-size:62px">We all spend hours on our phones every day.</div>
+  <div class="h" style="margin-top:40px; display:flex; gap:56px; color:var(--p)">
+    <em id="w-scroll" style="font-size:118px">Scrolling.</em><em id="w-watch" style="font-size:118px">Watching.</em><em id="w-wait" style="font-size:118px">Waiting.</em>
+  </div>
+</div></div></section>
+
+<!-- S2c -->
+<section class="scene cream" id="s2c"><div class="cam">
+  <div class="abs" style="left:150px; top:360px">
+    <div class="h words" id="s2ca">What if that time could</div>
+    <div class="h words" id="s2cb"><em>pay you back?</em></div>
+  </div>
+  <div class="card" id="c-sent" data-src="wallet-success" data-crop="0,1612,1170,630" data-w="520" style="left:1250px; top:330px"></div>
+</div></section>
+
+<!-- S3 -->
+<section class="scene dark" id="s3"><div class="cam"><div class="center">
+  <div class="sub" id="s3a" style="color:#9F9AC0; margin-bottom:34px">Meet</div>
+  <div class="logo" id="s3logo"><img src="shots/enro-icon.png" alt=""><b>Enro</b></div>
+  <div class="sub" id="s3b" style="color:#C9C5E4; margin-top:40px; font-size:34px">The app that rewards you for simple tasks.</div>
+  <div style="display:flex; gap:18px; margin-top:44px">
+    <span class="chip" id="ch-air">Airtime</span><span class="chip" id="ch-data">Data</span><span class="chip gold" id="ch-cash">Real cash</span>
+  </div>
+</div></div></section>
+
+<!-- S4 -->
+<section class="scene cream" id="s4"><div class="cam"><div class="center">
+  <div class="h words" id="s4a">Two simple ways</div>
+  <div class="h words" id="s4b">to <em>earn.</em></div>
+</div></div></section>
+
+<!-- S5 -->
+<section class="scene cream" id="s5"><div class="cam">
+  <div class="abs" style="left:160px; top:380px">
+    <div class="item" id="s5i1"><span class="n">01</span><span class="t">Tasks</span><span class="d">Watch a short ad, visit a page, follow a brand or check in. Every task pays coins.</span></div>
+    <div class="item" id="s5i2"><span class="n">02</span><span class="t">Special tasks</span><span class="d">Try an app or answer a survey. Once your proof is approved, the cash is yours.</span></div>
+  </div>
+  <div class="phone" id="ph5" style="left:1180px; top:79px" data-shots="home,tasks,special,special-detail,notifications,withdraw"></div>
+  <div class="pill" id="p5-coins" style="left:950px; top:560px"><i style="background:var(--gold)">✓</i>Every task pays coins</div>
+  <div class="pill" id="p5-cash" style="left:930px; top:300px"><i style="background:var(--cash)">✓</i>Approved · ₦250 added</div>
+  <div class="pill" id="p5-bank" style="left:950px; top:640px"><i style="background:var(--cash)">₦</i>Withdraw to your bank</div>
+</div></section>
+
+<!-- S6 -->
+<section class="scene dark" id="s6"><div class="cam"><div class="center">
+  <div class="h words" id="s6a" style="color:#fff">How does it <em>work?</em></div>
+</div></div></section>
+
+<!-- S7 -->
+<section class="scene cream" id="s7"><div class="cam">
+  <div class="abs" style="left:160px; top:320px">
+    <div class="item" id="s7i1"><span class="n">01</span><span class="t">Pick a task</span><span class="d">Open the app and choose any task you like.</span></div>
+    <div class="item" id="s7i2"><span class="n">02</span><span class="t">Keep it open, then claim</span><span class="d">A short timer runs. Tap Claim and the coins are yours.</span></div>
+    <div class="item" id="s7i3"><span class="n">03</span><span class="t">Swap coins for airtime or data</span><span class="d">MTN, Glo, Airtel or 9mobile, whenever you’re ready.</span></div>
+  </div>
+  <div class="phone" id="ph7" style="left:1230px; top:79px" data-shots="tasks,task-idle,task-running,task-claim,task-done,wallet,wallet-selected,wallet-success"></div>
+  <div class="pill" id="p-coins" style="left:990px; top:640px"><i style="background:var(--gold)">✓</i>+20 coins added</div>
+  <div class="pill" id="p-air" style="left:960px; top:600px"><i style="background:var(--cash)">✓</i>₦500 MTN airtime sent</div>
+</div></section>
+
+<!-- S8 -->
+<section class="scene dark" id="s8"><div class="cam">
+  <div class="abs" style="left:150px; top:250px">
+    <div class="words" id="s8a" style="font-size:54px; font-weight:600; letter-spacing:-0.03em">Every 1,000 coins</div>
+    <div class="gold" id="s8b" style="margin-top:6px; display:flex; align-items:baseline; gap:22px">
+      <em style="font-size:230px; line-height:1; color:var(--gold)">₦100</em><em style="font-size:84px; color:var(--gold)">airtime</em>
+    </div>
+    <div class="words" id="s8c" style="font-size:30px; color:#C9C5E4; margin-top:14px">Or data bundles on MTN, Glo, Airtel &amp; 9mobile.</div>
+    <div id="s8d" style="font-size:20px; color:#7F7AA6; margin-top:70px">Rates are set in the app and may change.</div>
+  </div>
+  <div class="card" id="c-topup" data-src="notifications" data-crop="62,1112,1046,196" data-w="560" style="left:1180px; top:300px"></div>
+  <div class="card" id="c-approved" data-src="notifications" data-crop="62,658,1046,232" data-w="560" style="left:1240px; top:520px"></div>
+  <div class="card" id="c-ref" data-src="notifications" data-crop="62,452,1046,190" data-w="560" style="left:1150px; top:760px"></div>
+</div></section>
+
+<!-- S9 -->
+<section class="scene cream" id="s9"><div class="cam">
+  <div class="abs" style="left:150px; top:380px">
+    <div class="h words" id="s9a">Check in every day.</div>
+    <div class="h words" id="s9b">Keep your <em>streak</em> alive.</div>
+  </div>
+  <div class="card" id="c-streak" data-src="home-after" data-crop="52,752,1066,386" data-w="640" style="left:1150px; top:390px"></div>
+  <div class="pill" id="p-bonus" style="left:1380px; top:700px"><i style="background:var(--p)">7</i>+100 bonus on day 7</div>
+</div></section>
+
+<!-- S10 -->
+<section class="scene cream" id="s10"><div class="cam">
+  <div class="abs" style="left:150px; top:380px">
+    <div class="h words" id="s10a">Bring your friends.</div>
+    <div class="h words" id="s10b">Earn <em>together.</em></div>
+  </div>
+  <div class="card" id="c-refer" data-src="referral" data-crop="48,160,1074,775" data-w="560" style="left:1190px; top:270px; border-radius:40px"></div>
+</div></section>
+
+<!-- S10n: no stress -->
+<section class="scene cream" id="s10n"><div class="cam">
+  <div class="abs" style="left:150px; top:330px">
+    <div class="q" id="n1"><span class="dot"></span><span>No stress.</span></div>
+    <div class="q" id="n2" style="margin-top:38px"><span class="dot"></span><span>No complicated steps.</span></div>
+    <div class="q" id="n3" style="margin-top:38px"><span class="dot"></span><span>Small things. Anytime, anywhere.</span></div>
+  </div>
+  <div class="card" id="c-tasks" data-src="tasks" data-crop="52,600,1066,640" data-w="520" style="left:1270px; top:240px"></div>
+</div></section>
+
+<!-- S11 -->
+<section class="scene cream" id="s11"><div class="cam"><div class="center">
+  <div class="h words" id="s11a">Your free time</div>
+  <div class="h words" id="s11b">already has <em>value.</em></div>
+</div></div></section>
+
+<!-- S12 -->
+<section class="scene dark" id="s12"><div class="cam"><div class="center">
+  <div class="h words" id="s12a" style="color:#fff; font-size:84px">Now it <em>pays.</em></div>
+</div></div></section>
+
+<!-- S13 -->
+<section class="scene dark" id="s13"><div class="cam"><div class="center">
+  <div class="logo" id="s13logo"><img src="shots/enro-icon.png" alt=""><b>Enro</b></div>
+  <div class="sub" id="s13b" style="color:#C9C5E4; margin-top:44px; font-size:34px">Do tasks. Earn airtime, data &amp; cash.</div>
+</div></div></section>
+
+<canvas id="grain" width="512" height="512"></canvas>
+<div id="fade"></div>
+
+<script>
+/* ================= timeline engine =================
+ * kf(el, [[time, {o, x, y, s, r, b, h}], ...]) — keyframes; values are interpolated with the
+ * NEXT keyframe's ease (default easeOut). o=opacity x/y=px s=scale r=deg b=blur(px) h=height(px)
+ */
+const FPS = 30;
+const DURATION = 98;
+const tracks = [];
+const $ = (s) => document.querySelector(s);
+const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+const easeInOut = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+const easeIn = (p) => p * p * p;
+const linear = (p) => p;
+const soft = (p) => 1 - Math.pow(1 - p, 4);
+
+function kf(el, keys) {
+  if (typeof el === 'string') el = $(el);
+  if (!el) throw new Error('missing element');
+  let t = tracks.find((x) => x.el === el);
+  if (!t) { t = { el, keys: [] }; tracks.push(t); }
+  t.keys.push(...keys);
+  t.keys.sort((a, b) => a[0] - b[0]);
+}
+function valueAt(keys, time, prop, fallback) {
+  let prev = null, next = null;
+  for (const k of keys) {
+    if (k[1][prop] === undefined) continue;
+    if (k[0] <= time) prev = k; else { next = k; break; }
+  }
+  if (!prev && !next) return fallback;
+  if (!prev) return next[1][prop];
+  if (!next) return prev[1][prop];
+  const p = Math.min(1, Math.max(0, (time - prev[0]) / (next[0] - prev[0])));
+  return prev[1][prop] + (next[1][prop] - prev[1][prop]) * (next[1].e || easeOut)(p);
+}
+function render(time) {
+  for (const { el, keys } of tracks) {
+    const o = valueAt(keys, time, 'o', 1);
+    const x = valueAt(keys, time, 'x', 0), y = valueAt(keys, time, 'y', 0);
+    const s = valueAt(keys, time, 's', 1), r = valueAt(keys, time, 'r', 0);
+    const b = valueAt(keys, time, 'b', 0), h = valueAt(keys, time, 'h', null);
+    el.style.opacity = o;
+    el.style.visibility = o < 0.002 ? 'hidden' : 'visible';
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${s}) rotate(${r}deg)`;
+    el.style.filter = b > 0.05 ? `blur(${b}px)` : 'none';
+    if (h !== null) el.style.height = h + 'px';
+  }
+  renderGrain(time);
+}
+
+/* ---------- building blocks ---------- */
+// fade a whole scene in/out, with a slow camera push
+function scene(id, tIn, tOut, push = 0.035) {
+  const el = $('#' + id);
+  kf(el, [[tIn - 0.5, { o: 0 }], [tIn, { o: 1, e: easeInOut }], [tOut - 0.5, { o: 1 }], [tOut, { o: 0, e: easeInOut }]]);
+  kf(el.querySelector('.cam'), [[tIn - 0.5, { s: 1 }], [tOut, { s: 1 + push, e: linear }]]);
+}
+// split text into words (keeping <em> as one unit) and reveal them one after another
+function words(el) {
+  if (typeof el === 'string') el = $(el);
+  const out = [];
+  [...el.childNodes].forEach((n) => {
+    if (n.nodeType === 3) {
+      n.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { el.insertBefore(document.createTextNode(part), n); return; }
+        const s = document.createElement('span'); s.className = 'w'; s.textContent = part; el.insertBefore(s, n); out.push(s);
+      });
+      el.removeChild(n);
+    } else { n.classList.add('w'); out.push(n); }
+  });
+  return out;
+}
+function reveal(el, t, { stagger = 0.075, dur = 0.85, y = 26, blur = 10 } = {}) {
+  const ws = words(el);
+  ws.forEach((w, i) => kf(w, [[t + i * stagger, { o: 0, y, b: blur }], [t + i * stagger + dur, { o: 1, y: 0, b: 0, e: soft }]]));
+  return t + (ws.length - 1) * stagger + dur;
+}
+function rise(el, t, { dur = 0.9, y = 30, blur = 10, s = 1 } = {}) {
+  kf(el, [[t, { o: 0, y, b: blur, s }], [t + dur, { o: 1, y: 0, b: 0, s: 1, e: soft }]]);
+}
+function leave(el, t, { dur = 0.5, y = -18, blur = 8 } = {}) {
+  kf(el, [[t, { o: 1, y: 0, b: 0 }], [t + dur, { o: 0, y, b: blur, e: easeIn }]]);
+}
+// a card cut from a real screen: data-src, data-crop="x,y,w,h" (screen px), data-w (display width)
+function buildCard(el) {
+  const [cx, cy, cw, ch] = el.dataset.crop.split(',').map(Number);
+  const w = Number(el.dataset.w), k = w / cw;
+  el.style.width = w + 'px'; el.style.height = Math.round(ch * k) + 'px';
+  const img = new Image(); img.src = `shots/${el.dataset.src}.png`;
+  img.style.width = Math.round(1170 * k) + 'px'; img.style.left = -cx * k + 'px'; img.style.top = -cy * k + 'px';
+  el.appendChild(img);
+}
+// floating card entrance + gentle drift
+function float(el, t, tOut, { from = 60, r0 = 3, r1 = -1.2, driftY = -14 } = {}) {
+  if (typeof el === 'string') el = $(el);
+  kf(el, [[t, { o: 0, y: from, r: r0, b: 8, s: 0.96 }], [t + 1.1, { o: 1, y: 0, r: r1, b: 0, s: 1, e: soft }], [tOut, { y: driftY, r: r1 - 0.6, e: linear }]]);
+}
+// phone: stacked real screenshots; show(name, t) cross-dissolves to it
+function buildPhone(el) {
+  el.innerHTML = `<div class="screen"><div class="sb"><span>9:41</span><span class="ic">
+    <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#17151F"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#17151F"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#17151F"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#17151F"/></svg>
+    <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0zM2.8 6.2a7.4 7.4 0 0 1 10.4 0L11.8 7.6a5.4 5.4 0 0 0-7.6 0zM0 3.4a11.3 11.3 0 0 1 16 0L14.6 4.8a9.3 9.3 0 0 0-13.2 0z" fill="#17151F"/></svg>
+    <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#17151F" opacity=".4"/><rect x="2" y="2" width="18" height="9" rx="2" fill="#17151F"/><rect x="24.5" y="4.5" width="1.6" height="4" rx=".8" fill="#17151F" opacity=".4"/></svg>
+    </span></div><div class="shotwrap"></div></div>`;
+  const wrap = el.querySelector('.shotwrap');
+  el._shots = {};
+  el.dataset.shots.split(',').forEach((name) => {
+    const img = new Image(); img.src = `shots/${name}.png`; img.style.opacity = 0; wrap.appendChild(img); el._shots[name] = img;
+  });
+}
+function show(phone, name, t, dur = 0.28) {
+  const img = phone._shots[name];
+  img.parentElement.appendChild(img); // later screens sit on top
+  kf(img, [[t, { o: 0, s: 1.012 }], [t + dur, { o: 1, s: 1, e: easeOut }]]);
+}
+// screen scroll inside the phone (px of display)
+function scroll(phone, name, t, dy, dur = 1.2) {
+  kf(phone._shots[name], [[t, { y: 0 }], [t + dur, { y: -dy, e: easeInOut }]]);
+}
+// touch indicator at screenshot coords (1170 x 2532 space)
+function tap(phone, sx, sy, t) {
+  const d = document.createElement('div'); d.className = 'tap';
+  d.style.left = (sx / 1170) * 400 + 'px'; d.style.top = 44 + (sy / 2532) * 865.6 + 'px';
+  phone.querySelector('.screen').appendChild(d);
+  kf(d, [[t - 0.18, { o: 0, s: 0.55 }], [t, { o: 1, s: 1, e: easeOut }], [t + 0.16, { s: 0.86, e: easeInOut }], [t + 0.5, { o: 0, s: 1.25, e: easeOut }]]);
+}
+function listActive(prefix, n, schedule, tEnd) {
+  // schedule: [[index, tStart], ...]; the active item is dark with its description open
+  for (let i = 1; i <= n; i++) {
+    const el = $(`#${prefix}${i}`);
+    const num = el.querySelector('.n'), title = el.querySelector('.t'), desc = el.querySelector('.d');
+    rise(el, schedule[0][1] - 0.2 + i * 0.12, { y: 20 });
+    const on = schedule.find((s) => s[0] === i)?.[1];
+    const offIdx = schedule.findIndex((s) => s[0] === i);
+    const off = schedule[offIdx + 1]?.[1] ?? tEnd;
+    if (on == null) continue;
+    colorize(title, on, off, '#C4C0CC', '#17151F');
+    colorize(num, on, off, '#C4C0CC', '#5B3DF5');
+    kf(desc, [[on, { h: 0, o: 0 }], [on + 0.55, { h: 76, o: 1, e: soft }], [off, { h: 76, o: 1 }], [off + 0.45, { h: 0, o: 0, e: easeInOut }]]);
+  }
+}
+// colour tween via a CSS variable track (stored as 0..1 mix)
+const colorTracks = [];
+function colorize(el, on, off, c0, c1) { colorTracks.push({ el, on, off, c0, c1 }); }
+function mix(a, b, p) {
+  const pa = a.match(/\w\w/g).map((h) => parseInt(h, 16)), pb = b.match(/\w\w/g).map((h) => parseInt(h, 16));
+  return 'rgb(' + pa.map((v, i) => Math.round(v + (pb[i] - v) * p)).join(',') + ')';
+}
+function renderColors(time) {
+  for (const c of colorTracks) {
+    let p = 0;
+    if (time >= c.on && time < c.off) p = soft(Math.min(1, (time - c.on) / 0.5));
+    else if (time >= c.off) p = 1 - easeInOut(Math.min(1, (time - c.off) / 0.45));
+    c.el.style.color = mix(c.c0, c.c1, p);
+  }
+}
+
+/* ---------- film grain (subtle, moves every frame) ---------- */
+const grain = $('#grain'), g = grain.getContext('2d');
+const noise = g.createImageData(512, 512);
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+for (let i = 0; i < noise.data.length; i += 4) { const v = 110 + rnd() * 145; noise.data[i] = noise.data[i + 1] = noise.data[i + 2] = v; noise.data[i + 3] = 255; }
+g.putImageData(noise, 0, 0);
+grain.style.width = '2020px'; grain.style.height = '1180px';
+function renderGrain(time) {
+  const f = Math.round(time * FPS);
+  grain.style.transform = `translate(${((f * 37) % 50) - 25}px, ${((f * 53) % 50) - 25}px)`;
+}
+
+/* ================= the film =================
+ * Timed to the voice-over (vo.mp3). v(t) = the second a line is spoken in the recording,
+ * shifted by VO_OFFSET so the voice starts after a short breath.
+ */
+const VO_OFFSET = 0.6;
+const v = (t) => t + VO_OFFSET;
+window.VO_OFFSET = VO_OFFSET;
+
+document.querySelectorAll('.card').forEach(buildCard);
+document.querySelectorAll('.phone').forEach(buildPhone);
+const ph5 = $('#ph5'), ph7 = $('#ph7');
+const pill = (sel, tIn, tOut) => kf(sel, [[tIn, { o: 0, x: 30, s: 0.9 }], [tIn + 0.6, { o: 1, x: 0, s: 1, e: soft }],
+  ...(tOut ? [[tOut, { o: 1 }], [tOut + 0.4, { o: 0, y: -10 }]] : [])]);
+// question-stack: each line arrives dark, turns grey (and loses its dot) when the next arrives
+function stack(lines) {
+  lines.forEach(([q, t], i) => {
+    const el = $(q), dim = lines[i + 1]?.[1] ?? 999;
+    rise(el, t, { y: 34 });
+    colorize(el.lastChild, t, dim, '#C4C0CC', '#17151F');
+    kf(el.firstChild, [[t, { o: 0, s: 0.3 }], [t + 0.5, { o: 1, s: 1 }], [dim, { o: 1 }], [dim + 0.4, { o: 0 }]]);
+  });
+}
+
+// "Let me ask you something. How much did you spend on data this month?"
+scene('s1', 0.25, v(3.85));
+kf('#s1pre', [[v(0.0), { o: 0, y: 14, b: 8 }], [v(0.7), { o: 1, y: 0, b: 0, e: soft }], [v(1.1), { o: 1 }], [v(1.5), { o: 0, y: -12, b: 6, e: easeIn }]]);
+reveal('#s1a', v(1.5), { stagger: 0.065 });
+reveal('#s1b', v(2.4), { stagger: 0.09 });
+
+// "And how many times did your airtime finish... right when you needed to make that call?"
+scene('s2', v(3.85), v(8.75));
+stack([['#q1', v(3.97)], ['#q2', v(6.6)]]);
+float('#c-net', v(4.3), v(8.75));
+float('#c-bal', v(6.9), v(8.75), { r0: 2, r1: -2 });
+
+// "We all spend hours on our phones every day. Scrolling. Watching. Waiting."
+scene('s2b', v(8.75), v(14.65));
+reveal('#s2ba', v(8.85), { stagger: 0.05 });
+rise('#w-scroll', v(11.86), { y: 24, blur: 12 });
+rise('#w-watch', v(12.7), { y: 24, blur: 12 });
+rise('#w-wait', v(13.76), { y: 24, blur: 12 });
+
+// "But what if that time could actually pay you back?"
+scene('s2c', v(14.65), v(17.5));
+reveal('#s2ca', v(14.82), { stagger: 0.07 });
+reveal('#s2cb', v(15.95), { stagger: 0.12 });
+float('#c-sent', v(15.4), v(17.5), { r0: -3, r1: 1.5 });
+
+// "Meet Enro. The app that rewards you for simple tasks... airtime, data... and real cash."
+scene('s3', v(17.5), v(27.35), 0.05);
+rise('#s3a', v(17.71), { y: 14 });
+kf('#s3logo', [[v(18.0), { o: 0, s: 0.86, b: 22 }], [v(19.1), { o: 1, s: 1, b: 0, e: soft }]]);
+rise('#s3b', v(19.0), { y: 18 });
+rise('#ch-air', v(24.55), { y: 18, s: 0.9 });
+rise('#ch-data', v(25.15), { y: 18, s: 0.9 });
+rise('#ch-cash', v(26.0), { y: 18, s: 0.85 });
+
+// "There are two ways to earn."
+scene('s4', v(27.35), v(29.0));
+reveal('#s4a', v(27.5), { stagger: 0.05, dur: 0.6 });
+reveal('#s4b', v(28.05), { stagger: 0.08, dur: 0.6 });
+
+// "First, tasks..." / "Then, special tasks..." — the phone follows along
+scene('s5', v(29.0), v(52.05), 0.02);
+listActive('s5i', 2, [[1, v(29.1)], [2, v(39.42)]], v(51.7));
+kf(ph5, [[v(28.9), { o: 0, y: 120, r: 2 }], [v(30.0), { o: 1, y: 0, r: 0, e: soft }], [v(52.05), { y: -12, e: linear }]]);
+show(ph5, 'home', v(28.9), 0.01);
+tap(ph5, 313, 1490, v(30.1));                 // Tasks card
+show(ph5, 'tasks', v(30.45));
+pill('#p5-coins', v(37.35), v(39.1));           // "Every task gives you coins"
+tap(ph5, 584, 2450, v(39.6));                 // Special tab
+show(ph5, 'special', v(39.95));
+tap(ph5, 583, 1140, v(41.4));                 // survey task
+show(ph5, 'special-detail', v(41.75));
+tap(ph5, 585, 1760, v(45.5));                 // "Upload your proof"
+show(ph5, 'notifications', v(47.4));          // "...real cash lands in your wallet"
+pill('#p5-cash', v(47.7), v(49.4));
+show(ph5, 'withdraw', v(49.65));              // "withdraw it straight to your bank"
+pill('#p5-bank', v(50.0));
+
+// "So how does it work?"
+scene('s6', v(52.05), v(53.5), 0.05);
+reveal('#s6a', v(52.2), { stagger: 0.07, dur: 0.6 });
+
+// "Open the app and pick a task. Keep it open while the timer runs. Then tap Claim... swap your coins..."
+scene('s7', v(53.5), v(66.85), 0.02);
+listActive('s7i', 3, [[1, v(53.63)], [2, v(55.53)], [3, v(60.58)]], v(66.5));
+kf(ph7, [[v(53.4), { o: 0, y: 120 }], [v(54.3), { o: 1, y: 0, e: soft }], [v(66.85), { y: -12, e: linear }]]);
+show(ph7, 'tasks', v(53.4), 0.01);
+tap(ph7, 583, 950, v(54.55));                 // pick the 30-second ad
+show(ph7, 'task-idle', v(54.9));
+tap(ph7, 585, 1817, v(55.75));                // Start task
+show(ph7, 'task-running', v(56.1));
+show(ph7, 'task-claim', v(57.15), 0.4);
+tap(ph7, 585, 1817, v(58.0));                 // "Then tap Claim"
+show(ph7, 'task-done', v(58.35));
+pill('#p-coins', v(58.96), v(60.3));          // "...and the coins are yours"
+show(ph7, 'wallet', v(60.65));
+tap(ph7, 314, 1886, v(63.1));                 // ₦500
+show(ph7, 'wallet-selected', v(63.3), 0.18);
+tap(ph7, 585, 2124, v(64.95));                // Redeem
+show(ph7, 'wallet-success', v(65.3), 0.45);
+pill('#p-air', v(65.7));
+
+// "Every one thousand coins gets you a hundred naira of airtime."
+scene('s8', v(66.85), v(70.5), 0.03);
+reveal('#s8a', v(66.93), { stagger: 0.06 });
+rise('#s8b', v(68.2), { y: 40, blur: 16 });
+reveal('#s8c', v(69.0), { stagger: 0.03, dur: 0.6 });
+rise('#s8d', v(69.3), { y: 10, blur: 4 });
+float('#c-topup', v(67.2), v(70.5), { r0: -4, r1: -2 });
+float('#c-approved', v(67.7), v(70.5), { r0: 4, r1: 1.5 });
+float('#c-ref', v(68.2), v(70.5), { r0: -3, r1: -1 });
+
+// "Check in every day to keep your streak alive, and earn bonus coins along the way."
+scene('s9', v(70.5), v(75.0));
+reveal('#s9a', v(70.56));
+reveal('#s9b', v(71.8));
+float('#c-streak', v(70.9), v(75.0), { r0: 3, r1: -1.5 });
+pill('#p-bonus', v(73.0));
+
+// "Bring your friends too. When they join... you both get rewarded."
+scene('s10', v(75.0), v(80.1));
+reveal('#s10a', v(75.14));
+reveal('#s10b', v(77.6), { stagger: 0.14 });
+float('#c-refer', v(75.6), v(80.1), { r0: -3, r1: 2 });
+
+// "No stress. No complicated steps. Just small things you can do anytime, anywhere."
+scene('s10n', v(80.1), v(85.6));
+stack([['#n1', v(80.23)], ['#n2', v(81.2)], ['#n3', v(82.58)]]);
+float('#c-tasks', v(80.6), v(85.6), { r0: 3, r1: -1 });
+
+// "Because your free time already has value."
+scene('s11', v(85.6), v(88.4));
+reveal('#s11a', v(85.74));
+reveal('#s11b', v(86.7), { stagger: 0.12 });
+
+// "Now... it pays." — each word on the voice
+scene('s12', v(88.4), v(90.45), 0.06);
+words('#s12a').forEach((w, i) => {
+  const t = [v(88.5), v(89.26), v(89.5)][i];
+  kf(w, [[t, { o: 0, y: 26, b: 10 }], [t + 0.8, { o: 1, y: 0, b: 0, e: soft }]]);
+});
+
+// "Enro. Do tasks. Earn airtime, data and cash." — end card, no download links
+scene('s13', v(90.45), DURATION + 0.5, 0.04);
+kf('#s13logo', [[v(90.5), { o: 0, s: 0.88, b: 20 }], [v(91.5), { o: 1, s: 1, b: 0, e: soft }]]);
+rise('#s13b', v(91.3), { y: 16 });
+kf('#fade', [[v(95.4), { o: 0 }], [DURATION - 0.1, { o: 1, e: easeInOut }]]);
+
+// colours are driven separately from transforms
+const baseRender = render;
+window.render = (t) => { baseRender(t); renderColors(t); };
+window.DURATION = DURATION;
+window.FPS = FPS;
+window.ready = () => Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.complete ? 1 : new Promise((r) => { i.onload = r; i.onerror = r; }))])
+  .then(() => document.fonts.check('italic 40px "Instrument Serif"') && document.fonts.check('700 40px "Inter"'));
+render(0);
+</script>
+</body>
+</html>

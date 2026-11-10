@@ -1,0 +1,7 @@
+ad/node_modules/
+ad/stills/
+ad/audio.f32
+ad/soundtrack.wav
+ad/_*.html
+ad/sheet.jpg
+*.mp4

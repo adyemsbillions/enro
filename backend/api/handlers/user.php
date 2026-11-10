@@ -9,7 +9,7 @@ function app_config(): array
         'app_name'         => $s['app_name'] ?? 'Enro',
         'coins_per_naira'  => (int)($s['coins_per_naira'] ?? 10),
         'airtime_amounts'  => array_values(array_map('intval', array_filter(explode(',', $s['airtime_amounts'] ?? '')))),
-        'min_withdraw'     => (int)($s['min_withdraw'] ?? 1000),
+        'min_withdraw'     => (int)($s['min_withdraw'] ?? 3000),
         'withdraw_fee'     => (int)($s['withdraw_fee'] ?? 50),
         'daily_task_limit' => (int)($s['daily_task_limit'] ?? 10),
         'ref_bonus_referrer' => (int)($s['ref_bonus_referrer'] ?? 0),

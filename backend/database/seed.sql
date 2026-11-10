@@ -3,7 +3,7 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('app_name','Enro'),
  ('coins_per_naira','10'),
  ('airtime_amounts','100,200,500,1000'),
- ('min_withdraw','1000'),
+ ('min_withdraw','3000'),
  ('withdraw_fee','50'),
  ('daily_task_limit','10'),
  ('welcome_bonus','100'),

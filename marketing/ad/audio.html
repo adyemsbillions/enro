@@ -1,0 +1,203 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Enro ad — soundtrack</title>
+<script>
+/*
+ * Soundtrack for the Enro ad: voice-over (vo.mp3) + original music and sound effects synthesised with
+ * the Web Audio API (no samples, no licensing issues).
+ * 100 BPM, D major. Bars start at 1.8 s so the beat lands on the "Meet Enro" logo (18.6 s).
+ * The music ducks under the voice using the speech segments in vo-segments.json.
+ * Cue times match ad.html (video time = voice time + VO_OFFSET).
+ */
+const SR = 48000, DUR = 98, VO_OFFSET = 0.6;
+const BPM = 100, BEAT = 60 / BPM, BAR = BEAT * 4, OFFSET = 1.8;
+const INTRO_END = 18.4, DROP_START = 88.9, OUTRO_START = 91.0;
+const CUES = {
+  taps: [30.7, 40.2, 42.0, 46.1, 55.15, 56.35, 58.6, 63.7, 65.55],
+  coin: [59.56, 73.6],
+  success: [48.3, 65.9],
+  whoosh: [17.95, 52.5, 67.3, 88.85],
+  shimmer: [18.55, 91.05],
+};
+const MUSIC_LEVEL = 0.62, DUCKED = 0.2; // music gain in gaps / under the voice
+const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+// D major progression: Dmaj9 – Bm9 – Gmaj9 – Asus4/A
+const CHORDS = [
+  { bass: 38, pad: [62, 66, 69, 73, 76], arp: [74, 78, 81, 85] },
+  { bass: 35, pad: [59, 62, 66, 69, 73], arp: [71, 74, 78, 81] },
+  { bass: 31, pad: [55, 59, 62, 66, 69], arp: [67, 71, 74, 78] },
+  { bass: 33, pad: [57, 62, 64, 69, 73], arp: [69, 73, 76, 81] },
+];
+
+window.make = async (opts = {}) => {
+  const ctx = new OfflineAudioContext(2, SR * DUR, SR);
+  // music bus (ducked under the voice) and sound-effects bus (not ducked)
+  const master = ctx.createGain();
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
+  const duck = ctx.createGain();
+  master.connect(comp).connect(duck).connect(ctx.destination);
+  const sfxBus = ctx.createGain(); sfxBus.gain.value = 0.55; sfxBus.connect(ctx.destination);
+  let BUS = master;
+
+  // fade in/out of the music
+  master.gain.setValueAtTime(0, 0);
+  master.gain.linearRampToValueAtTime(0.9, 1.2);
+  master.gain.setValueAtTime(0.9, 95.6);
+  master.gain.linearRampToValueAtTime(0, 97.9);
+
+  // ---------- voice-over + ducking ----------
+  console.log("loading voice");
+  const vo = await ctx.decodeAudioData(await (await fetch('vo.mp3')).arrayBuffer());
+  const segs = (await (await fetch('vo-segments.json')).json()).segs;
+  const voSrc = ctx.createBufferSource(); voSrc.buffer = vo;
+  const voComp = ctx.createDynamicsCompressor();
+  voComp.threshold.value = -20; voComp.ratio.value = 2.5; voComp.attack.value = 0.005; voComp.release.value = 0.15;
+  const voGain = ctx.createGain(); voGain.gain.value = 1.15;
+  voSrc.connect(voComp).connect(voGain).connect(ctx.destination);
+  voSrc.start(VO_OFFSET);
+  // merge segments with short gaps so the music doesn't pump between words
+  const spans = [];
+  segs.forEach(([a, b]) => {
+    const s = a + VO_OFFSET, e = b + VO_OFFSET, last = spans[spans.length - 1];
+    if (last && s - last[1] < 0.75) last[1] = e; else spans.push([s, e]);
+  });
+  duck.gain.setValueAtTime(MUSIC_LEVEL, 0);
+  spans.forEach(([s, e]) => {
+    duck.gain.setTargetAtTime(DUCKED, Math.max(0, s - 0.12), 0.06);
+    duck.gain.setTargetAtTime(MUSIC_LEVEL, e + 0.15, 0.25);
+  });
+
+  // reverb (generated impulse)
+  const verb = ctx.createConvolver();
+  const ir = ctx.createBuffer(2, SR * 3, SR);
+  for (let c = 0; c < 2; c++) {
+    const d = ir.getChannelData(c);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3.2);
+  }
+  verb.buffer = ir;
+  const verbGain = ctx.createGain(); verbGain.gain.value = 0.32;
+  verb.connect(verbGain).connect(master);
+
+  const noise = ctx.createBuffer(1, SR * 2, SR);
+  { const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+
+  const out = (node, dry = 1, wet = 0.4, pan = 0) => {
+    const p = ctx.createStereoPanner(); p.pan.value = pan;
+    const g = ctx.createGain(); g.gain.value = dry;
+    const s = ctx.createGain(); s.gain.value = wet;
+    node.connect(p); p.connect(g).connect(BUS); p.connect(s).connect(verb);
+  };
+
+  function pad(t0, t1, notes, level) {
+    notes.forEach((m, i) => {
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 820; lp.Q.value = 0.4;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(level, t0 + 1.4);
+      g.gain.setValueAtTime(level, Math.max(t0 + 1.4, t1 - 0.2));
+      g.gain.linearRampToValueAtTime(0, t1 + 1.6);
+      [-6, 6].forEach((det) => {
+        const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = hz(m); o.detune.value = det;
+        o.connect(lp); o.start(t0); o.stop(t1 + 1.7);
+      });
+      lp.connect(g); out(g, 0.55, 0.7, (i % 2 ? 0.25 : -0.25));
+    });
+  }
+  function pluck(t, m, vel, pan = 0, decay = 1.3) {
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(5200, t); lp.frequency.exponentialRampToValueAtTime(900, t + decay);
+    [[1, 'sine', 1], [2, 'triangle', 0.28], [3, 'sine', 0.08]].forEach(([mul, type, amp]) => {
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = hz(m) * mul;
+      const a = ctx.createGain(); a.gain.value = amp; o.connect(a).connect(lp); o.start(t); o.stop(t + decay + 0.05);
+    });
+    lp.connect(g); out(g, 0.9, 0.45, pan);
+  }
+  function bass(t, m, len) {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = hz(m);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.32, t + 0.03);
+    g.gain.setValueAtTime(0.32, t + len - 0.15); g.gain.linearRampToValueAtTime(0, t + len);
+    o.connect(g); out(g, 1, 0.05); o.start(t); o.stop(t + len + 0.05);
+  }
+  function kick(t, vel = 0.7) {
+    const o = ctx.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
+    const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+    o.connect(g); out(g, 1, 0.03); o.start(t); o.stop(t + 0.4);
+  }
+  function noiseHit(t, { type = 'highpass', f = 8000, q = 0.7, vel = 0.08, decay = 0.05, pan = 0, wet = 0.15 } = {}) {
+    const s = ctx.createBufferSource(); s.buffer = noise;
+    const flt = ctx.createBiquadFilter(); flt.type = type; flt.frequency.value = f; flt.Q.value = q;
+    const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    s.connect(flt).connect(g); out(g, 1, wet, pan); s.start(t, Math.random()); s.stop(t + decay + 0.02);
+  }
+  function whoosh(t) {
+    const s = ctx.createBufferSource(); s.buffer = noise;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2;
+    bp.frequency.setValueAtTime(260, t); bp.frequency.exponentialRampToValueAtTime(2600, t + 0.55); bp.frequency.exponentialRampToValueAtTime(600, t + 1.0);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 0.45); g.gain.linearRampToValueAtTime(0, t + 1.0);
+    s.connect(bp).connect(g); out(g, 1, 0.6); s.start(t, 0.3); s.stop(t + 1.05);
+  }
+
+  // ---------- music ----------
+  // lead-in before the first bar, then bars; chords rotated so the home chord (Dmaj9) lands on the logo
+  pad(0, OFFSET + 0.3, CHORDS[0].pad, 0.05);
+  const bars = Math.ceil((DUR - OFFSET) / BAR);
+  for (let b = 0; b < bars; b++) {
+    const t = OFFSET + b * BAR, c = CHORDS[(b + 1) % 4], end = t + BAR;
+    if (t >= OUTRO_START) break;
+    const intro = t < INTRO_END - 0.3, drop = t >= DROP_START;
+    pad(t, end, c.pad, intro ? 0.065 : drop ? 0.045 : 0.022);
+    if (intro) {
+      if (b >= 1) pluck(t, c.arp[0], 0.2, -0.2, 2.4);
+      if (b >= 2) pluck(t + BEAT * 2, c.arp[2], 0.14, 0.25, 2.0);
+      if (b >= 4) for (let i = 0; i < 4; i++) noiseHit(t + i * BEAT + BEAT / 2, { vel: 0.018, decay: 0.04, pan: 0.3 }); // hint of rhythm
+      continue;
+    }
+    if (drop) continue;
+    const ok = (x) => x < DROP_START; // the beat stops exactly at "Now... it pays", even mid-bar
+    bass(t, c.bass, Math.min(BAR - 0.05, DROP_START - t));
+    for (let i = 0; i < 8; i++) {
+      const at = t + i * BEAT / 2, m = c.arp[[0, 1, 2, 3, 2, 1, 3, 2][i]];
+      if (ok(at)) pluck(at, m, (i % 2 ? 0.06 : 0.09) * (t > 66.8 && t < 88 ? 1.15 : 1), i % 2 ? 0.3 : -0.3, 0.9);
+    }
+    if (ok(t)) kick(t, 0.6);
+    if (ok(t + BEAT * 2)) kick(t + BEAT * 2, 0.45);
+    if (t >= 29) for (let i = 0; i < 4; i++) { const at = t + i * BEAT + BEAT / 2; if (ok(at)) noiseHit(at, { vel: 0.035, decay: 0.045, pan: 0.35 }); }
+  }
+  // "Now..." — one soft note in the silence, then the final chord on the end card
+  pluck(89.1, 78, 0.12, 0, 3);
+  pad(OUTRO_START, 96.5, CHORDS[0].pad, 0.03);
+  bass(OUTRO_START + 0.1, 38, 5);
+  [62, 66, 69, 73, 76].forEach((m, i) => pluck(91.15 + i * 0.07, m + 12, 0.1, (i - 2) * 0.2, 4.5));
+
+  BUS = sfxBus; // sound effects below are not ducked
+
+  // ---------- sound design ----------
+  CUES.taps.forEach((t) => noiseHit(t, { type: 'bandpass', f: 2400, q: 1.4, vel: 0.22, decay: 0.03, wet: 0.05 }));
+  CUES.coin.forEach((t) => { pluck(t, 88, 0.16, 0.2, 0.9); pluck(t + 0.075, 93, 0.14, 0.2, 1.2); });
+  CUES.success.forEach((t) => { pluck(t, 81, 0.12, 0, 0.8); pluck(t + 0.09, 85, 0.12, 0, 0.9); pluck(t + 0.18, 88, 0.12, 0, 1.4); });
+  CUES.whoosh.forEach(whoosh);
+  CUES.shimmer.forEach((t) => [86, 90, 93, 98].forEach((m, i) => pluck(t + i * 0.06, m, 0.045, (i - 1.5) * 0.4, 2.5)));
+
+  console.log("rendering", spans.length, "voice spans");
+  const buf = await ctx.startRendering();
+  console.log("rendered");
+  const L = buf.getChannelData(0), R = buf.getChannelData(1);
+  let peak = 0;
+  for (let i = 0; i < L.length; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
+  const norm = peak > 0 ? 0.89 / peak : 1; // leave headroom for AAC
+  const inter = new Float32Array(L.length * 2);
+  for (let i = 0; i < L.length; i++) { inter[i * 2] = L[i] * norm; inter[i * 2 + 1] = R[i] * norm; }
+  window.__audio = new Uint8Array(inter.buffer);
+  return { bytes: window.__audio.length, peak };
+};
+window.chunk = (off, len) => {
+  const u8 = window.__audio.subarray(off, off + len);
+  let s = ''; for (let i = 0; i < u8.length; i += 32768) s += String.fromCharCode.apply(null, u8.subarray(i, i + 32768));
+  return btoa(s);
+};
+</script>

@@ -50,7 +50,7 @@ export default function Referral() {
 
       <Card style={{ marginTop: 16 }}>
         <T style={{ fontWeight: '700', fontSize: 15 }}>How it works</T>
-        {['Share your code with friends', 'They sign up and verify their phone', `When they finish ${data.unlock_tasks} tasks, you both get coins`].map((s, i) => (
+        {['Share your code with friends', 'They sign up and verify their email', `When they finish ${data.unlock_tasks} tasks, you both get coins`].map((s, i) => (
           <Row key={i} gap={10} style={{ marginTop: 10 }}>
             <View style={st.num}><T style={{ color: C.p, fontWeight: '800', fontSize: 12 }}>{i + 1}</T></View>
             <T style={{ flex: 1 }}>{s}</T>

@@ -16,7 +16,7 @@ function wallet_options(): array
         'coins_per_naira' => $rate,
         'airtime' => array_values(array_map(fn($a) => ['amount' => (int)$a, 'coins' => (int)$a * $rate], array_filter(explode(',', setting('airtime_amounts', '100,200,500,1000'))))),
         'data_plans' => $plans,
-        'min_withdraw' => setting_int('min_withdraw', 1000),
+        'min_withdraw' => setting_int('min_withdraw', 3000),
         'withdraw_fee' => setting_int('withdraw_fee', 50),
         'banks' => Paystack::banks(),
     ];
@@ -87,7 +87,7 @@ function wallet_withdraw(): array
     $bankCode = (string)in('bank_code');
     $amount = (int)in('amount');
     $fee = setting_int('withdraw_fee', 50);
-    $min = setting_int('min_withdraw', 1000);
+    $min = setting_int('min_withdraw', 3000);
     if (strlen($acct) !== 10) fail('Account number must be 10 digits', 422);
     if ($amount < $min) fail('Minimum withdrawal is ' . naira($min), 422);
     if (val("SELECT 1 FROM payouts WHERE user_id = ? AND kind = 'cash' AND status IN ('pending','processing')", [$u['id']])) {

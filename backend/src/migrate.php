@@ -30,5 +30,19 @@ function run_migrations(PDO $pdo): array
             $log[] = "Added $table.$col";
         }
     }
+
+    // One-time data changes. Each runs once (a marker row in settings), so later edits in Admin → Settings stick.
+    $once = [
+        'nov2026_min_withdraw_3000' => ["UPDATE settings SET v = '3000' WHERE k = 'min_withdraw' AND CAST(v AS UNSIGNED) < 3000",
+                                        'Minimum cash withdrawal raised to ₦3,000'],
+    ];
+    foreach ($once as $key => [$sql, $label]) {
+        $st = $pdo->prepare('SELECT 1 FROM settings WHERE k = ?');
+        $st->execute(["migration:$key"]);
+        if ($st->fetchColumn()) continue;
+        $pdo->exec($sql);
+        $pdo->prepare('INSERT INTO settings (k, v) VALUES (?, ?)')->execute(["migration:$key", date('Y-m-d H:i:s')]);
+        $log[] = $label;
+    }
     return $log;
 }
