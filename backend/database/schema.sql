@@ -206,10 +206,25 @@ CREATE TABLE IF NOT EXISTS payments (
   purpose       VARCHAR(30)  NOT NULL,            -- special_unlock
   reference     VARCHAR(100) NOT NULL UNIQUE,
   amount        INT          NOT NULL,            -- naira
-  status        ENUM('pending','paid','failed','abandoned') NOT NULL DEFAULT 'pending',
+  status        ENUM('pending','paid','failed','abandoned','rejected') NOT NULL DEFAULT 'pending',
+  method        VARCHAR(20)  NOT NULL DEFAULT 'paystack', -- paystack | transfer (receipt uploaded by the user)
+  proof_path    VARCHAR(255) NULL,                -- transfer receipt image (storage/proofs/payments/…)
+  reject_reason VARCHAR(255) NULL,
+  reviewed_by   INT UNSIGNED NULL,                -- admin who confirmed / rejected a transfer
+  reviewed_at   DATETIME     NULL,
   provider_id   BIGINT       NULL,                -- Paystack transaction id
   channel       VARCHAR(30)  NULL,                -- card, bank_transfer, ussd…
   paid_at       DATETIME     NULL,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX (user_id, purpose), INDEX (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Phones of admins logged in to the admin screens of the app (they get "new payment receipt" pushes)
+CREATE TABLE IF NOT EXISTS admin_push_tokens (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id    INT UNSIGNED NOT NULL,
+  token       VARCHAR(255) NOT NULL UNIQUE,
+  platform    VARCHAR(10)  NOT NULL DEFAULT 'android',
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (admin_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

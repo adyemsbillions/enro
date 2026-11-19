@@ -44,12 +44,14 @@ export function PushManager() {
 
   // tap → open the screen the notification points at
   useEffect(() => {
-    if (!ready || !token || !lastResponse) return;
+    if (!ready || !lastResponse) return;
     if (lastResponse.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
+    const route = routeFor(lastResponse.notification.request.content.data as Record<string, unknown>);
+    // admin alerts open even when no user is logged in on this phone
+    if (!token && !route?.startsWith('/admin')) return;
     const id = lastResponse.notification.request.identifier;
     if (handled.current === id) return;
     handled.current = id;
-    const route = routeFor(lastResponse.notification.request.content.data as Record<string, unknown>);
     if (route) setTimeout(() => router.push(route as Href), 300);
   }, [ready, token, lastResponse]);
 

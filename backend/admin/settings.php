@@ -6,7 +6,7 @@ $numbers = [
     'coins_per_naira'    => ['Coins per ₦1', 'e.g. 10 means 1,000 coins = ₦100 airtime'],
     'airtime_amounts'    => ['Airtime amounts (₦)', 'Comma separated, e.g. 100,200,500,1000'],
     'min_withdraw'       => ['Minimum cash withdrawal (₦)', ''],
-    'special_unlock_fee' => ['Special tasks unlock fee (₦)', 'One-time Paystack payment before a user can do cash tasks'],
+    'special_unlock_fee' => ['Special tasks unlock fee (₦)', 'One-time payment before a user can do cash tasks'],
     'withdraw_fee'       => ['Withdrawal fee (₦)', 'Deducted on top of the amount'],
     'daily_task_limit'   => ['Coin tasks per user per day', 'Daily check-in not counted'],
     'welcome_bonus'      => ['Welcome bonus (coins)', 'After phone is verified'],
@@ -29,6 +29,11 @@ if (is_post()) {
         if (strlen((string)post('new')) < 10) fail('New password must be at least 10 characters');
         q('UPDATE admins SET password_hash = ? WHERE id = ?', [password_hash((string)post('new'), PASSWORD_DEFAULT), $a['id']]);
         flash('Password changed');
+        redirect('settings.php');
+    }
+    if (post('action') === 'bank') {
+        save_unlock_bank(post('bank'), post('number'), post('name'));
+        flash('Payment account saved. Users see it straight away.');
         redirect('settings.php');
     }
     if (post('action') === 'mail') {
@@ -86,6 +91,14 @@ layout_start('Settings', 'settings');
   <button class="btn mt16">Save settings</button>
  </form>
  <div>
+  <form method="post" class="card" style="margin-bottom:16px" autocomplete="off"><?= csrf_field() ?><input type="hidden" name="action" value="bank">
+   <div class="h3">Account for the unlock fee</div>
+   <p class="sm" style="margin:-4px 0 12px">Users transfer the fee here and upload the receipt. Change it any time; the app shows the new account at once.</p>
+   <div class="field"><label>Bank</label><input class="inp" name="bank" value="<?= e($s['unlock_bank_name'] ?? '') ?>" placeholder="e.g. Opay"></div>
+   <div class="field"><label>Account number</label><input class="inp" name="number" inputmode="numeric" value="<?= e($s['unlock_account_number'] ?? '') ?>" placeholder="10 digits"></div>
+   <div class="field"><label>Account name</label><input class="inp" name="name" value="<?= e($s['unlock_account_name'] ?? '') ?>"></div>
+   <button class="btn">Save account</button>
+  </form>
   <div class="card"><div class="h3">Providers</div>
    <div class="set"><div class="t"><b style="font-weight:600">VTpass (airtime & data)</b><span class="sm"><?= e(config('vtpass.base_url')) ?></span></div><?= Vtpass::configured() ? status_pill('active') : '<span class="pill grey">Not set</span>' ?></div>
    <div class="set"><div class="t"><b style="font-weight:600">Paystack (bank payouts)</b><span class="sm">Account lookup + transfers</span></div><?= Paystack::configured() ? status_pill('active') : '<span class="pill grey">Not set</span>' ?></div>

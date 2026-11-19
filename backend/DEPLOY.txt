@@ -37,6 +37,11 @@ PUSH NOTIFICATIONS (Firebase)
 
 OTHER KEYS (edit config.php in File Manager)
 - vtpass keys           → automatic airtime/data
+UNLOCK FEE (special tasks)
+- Admin → Settings → "Account for the unlock fee": the account users pay into. Change it any time.
+- Users upload their receipt in the app; admins confirm it in Admin → Unlock fees or in the app
+  (Login screen → "Admin login", same email + password as this panel). Add more admins in Admin → Admins.
+
 - paystack.secret_key   → bank account lookup + transfers
   (no webhook needed: the cron job confirms payments and transfers with Paystack)
 

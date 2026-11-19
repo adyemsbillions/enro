@@ -72,4 +72,7 @@ INSERT IGNORE INTO settings (k, v) VALUES
 
 INSERT IGNORE INTO settings (k, v) VALUES
  ('special_unlock_enabled','1'),
- ('special_unlock_fee','1000');
+ ('special_unlock_fee','1000'),
+ ('unlock_bank_name',''),
+ ('unlock_account_number',''),
+ ('unlock_account_name','');

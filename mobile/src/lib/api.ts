@@ -32,14 +32,17 @@ export class ApiError extends Error {
   }
 }
 
-type Options = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; form?: FormData; boot?: boolean };
+/** `auth` replaces the logged-in user's token for this request (the admin screens use their own token). */
+type Options = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; form?: FormData; boot?: boolean; auth?: string | null };
 
 export async function api<T = any>(path: string, opts: Options = {}): Promise<T> {
   if (!opts.boot) await ready;
   const headers: Record<string, string> = { Accept: 'application/json' };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-    headers['X-Auth-Token'] = token; // some hosts strip Authorization; this one always gets through
+  const own = opts.auth !== undefined;
+  const t = own ? opts.auth : token;
+  if (t) {
+    headers.Authorization = `Bearer ${t}`;
+    headers['X-Auth-Token'] = t; // some hosts strip Authorization; this one always gets through
   }
   let body: BodyInit | undefined;
   if (opts.form) {
@@ -58,7 +61,7 @@ export async function api<T = any>(path: string, opts: Options = {}): Promise<T>
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const message = data.error ?? 'Something went wrong. Please try again.';
-    if (token && (res.status === 401 || data.banned)) onUnauthorized?.(message);
+    if (!own && token && (res.status === 401 || data.banned)) onUnauthorized?.(message);
     throw new ApiError(message, res.status, data);
   }
   return data as T;

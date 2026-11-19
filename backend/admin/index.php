@@ -26,6 +26,7 @@ $max = max(5, max($days));
 
 $attention = [
     ['submissions.php', 'image', 'Special task proofs to review', (int)val("SELECT COUNT(*) FROM submissions WHERE status='pending'")],
+    ['payments.php', 'cash', 'Payment receipts to confirm', (int)val("SELECT COUNT(*) FROM payments WHERE method = 'transfer' AND status = 'pending'")],
     ['payouts.php?tab=topup', 'wifi', 'Airtime / data requests', (int)val("SELECT COUNT(*) FROM payouts WHERE kind<>'cash' AND status IN ('pending','processing')")],
     ['payouts.php?tab=cash', 'cash', 'Cash withdrawals', (int)val("SELECT COUNT(*) FROM payouts WHERE kind='cash' AND status IN ('pending','processing')")],
 ];

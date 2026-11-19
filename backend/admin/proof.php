@@ -3,8 +3,12 @@
 require __DIR__ . '/_boot.php';
 require_admin();
 
-$path = val('SELECT proof_path FROM submissions WHERE id = ?', [(int)($_GET['id'] ?? 0)]);
-$file = $path ? realpath(STORAGE_PATH . '/' . $path) : false;
+if (isset($_GET['payment'])) {
+    $file = payment_receipt_file((int)$_GET['payment']) ?? false;
+} else {
+    $path = val('SELECT proof_path FROM submissions WHERE id = ?', [(int)($_GET['id'] ?? 0)]);
+    $file = $path ? realpath(STORAGE_PATH . '/' . $path) : false;
+}
 if (!$file || !str_starts_with($file, realpath(STORAGE_PATH . '/proofs'))) { http_response_code(404); exit('Not found'); }
 
 header('Content-Type: ' . (new finfo(FILEINFO_MIME_TYPE))->file($file));

@@ -130,6 +130,8 @@ export function routeFor(data: Record<string, unknown> | undefined): string | nu
     case 'notifications': return '/notifications';
     case 'task': return id ? `/task/${id}` : '/tasks';
     case 'special_task': return id ? `/special/${id}` : '/special';
+    case 'admin': return '/admin';
+    case 'admin_payment': return id ? `/admin/payment/${id}` : '/admin';
     default: return null;
   }
 }

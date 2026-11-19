@@ -111,7 +111,32 @@ function special_save_submission(array $u, array $t, int $id, string $note, ?str
 
 function unlock_state(array $u): array
 {
-    return ['unlocked' => user_unlocked($u), 'unlock_fee' => unlock_required() ? unlock_fee() : 0];
+    $open = !user_unlocked($u);
+    return [
+        'unlocked' => !$open, 'unlock_fee' => unlock_required() ? unlock_fee() : 0,
+        'unlock_bank' => $open ? unlock_bank() : null,
+        'unlock_receipt' => $open ? unlock_receipt_state((int)$u['id']) : null,
+    ];
+}
+
+/** The user paid the unlock fee by bank transfer and uploads the receipt; every admin phone is notified. */
+function unlock_receipt(): array
+{
+    $u = auth_user();
+    if (user_unlocked($u)) return ['unlocked' => true] + unlock_state($u);
+    if (!unlock_bank()) fail('Payments are not open yet. Please try again later.', 503);
+    if (val("SELECT 1 FROM payments WHERE user_id = ? AND purpose = 'special_unlock' AND method = 'transfer' AND status = 'pending'", [$u['id']])) {
+        fail('Your receipt is already being confirmed. Please wait a moment.', 422);
+    }
+    rate_limit('receipt:' . $u['id'], 6, 3600);
+    $path = save_uploaded_image('proof', 'payments', (int)$u['id']);
+    $fee = unlock_fee();
+    $ref = 'ENRO-TRF-' . $u['id'] . '-' . strtoupper(bin2hex(random_bytes(4)));
+    q('INSERT INTO payments (user_id, purpose, reference, amount, method, proof_path) VALUES (?, ?, ?, ?, ?, ?)',
+      [$u['id'], 'special_unlock', $ref, $fee, 'transfer', $path]);
+    $id = (int)val('SELECT id FROM payments WHERE reference = ?', [$ref]);
+    queue_push(null, 'New payment receipt 💳', $u['name'] . ' sent ' . naira($fee) . '. Tap to confirm.', ['screen' => 'admin_payment', 'id' => $id]);
+    return ['ok' => true] + unlock_state($u);
 }
 
 /** Starts a Paystack checkout for the unlock fee and returns its URL. */

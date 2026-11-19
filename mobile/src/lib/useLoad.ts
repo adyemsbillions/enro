@@ -25,6 +25,8 @@ export function useLoad<T>(fn: () => Promise<T>) {
   }, []);
 
   useFocusEffect(useCallback(() => { run(); }, [run]));
+  const refetch = useCallback(() => { run(false); }, [run]);
 
-  return { data, setData, error, refreshing, reload: () => run(true), loading: data === null && error === null };
+  // refetch: reload without the pull-to-refresh spinner (for background polling)
+  return { data, setData, error, refreshing, reload: () => run(true), refetch, loading: data === null && error === null };
 }

@@ -102,3 +102,11 @@ export type WalletOptions = {
   withdraw_fee: number;
   banks: { name: string; code: string }[];
 };
+
+/** Unlock state sent with the special task list and detail. */
+export type UnlockInfo = {
+  unlocked: boolean;
+  unlock_fee: number;
+  unlock_bank: { bank: string; number: string; name: string } | null;
+  unlock_receipt: { status: 'pending' | 'rejected'; reason: string | null; sent_at: string } | null;
+};

@@ -7,6 +7,7 @@ require __DIR__ . '/handlers/user.php';
 require __DIR__ . '/handlers/tasks.php';
 require __DIR__ . '/handlers/special.php';
 require __DIR__ . '/handlers/wallet.php';
+require __DIR__ . '/handlers/admin.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, X-Auth-Token, Content-Type');
@@ -39,6 +40,7 @@ $routes = [
     ['POST', '/tasks/{id}/claim',     'tasks_claim'],
     // special tasks
     ['GET',  '/special-tasks',        'special_list'],
+    ['POST', '/special-tasks/unlock/receipt', 'unlock_receipt'],
     ['POST', '/special-tasks/unlock', 'unlock_init'],
     ['POST', '/special-tasks/unlock/verify', 'unlock_verify'],
     ['GET',  '/special-tasks/{id}',   'special_show'],
@@ -48,6 +50,17 @@ $routes = [
     ['POST', '/wallet/redeem',        'wallet_redeem'],
     ['POST', '/wallet/resolve-account','wallet_resolve'],
     ['POST', '/wallet/withdraw',      'wallet_withdraw'],
+    // admin screens in the app
+    ['POST', '/admin/login',           'admin_api_login'],
+    ['GET',  '/admin/me',              'admin_api_me'],
+    ['GET',  '/admin/payments',        'admin_api_payments'],
+    ['GET',  '/admin/payments/{id}',   'admin_api_payment'],
+    ['GET',  '/admin/payments/{id}/receipt', 'admin_api_receipt'],
+    ['POST', '/admin/payments/{id}/approve', 'admin_api_approve'],
+    ['POST', '/admin/payments/{id}/reject',  'admin_api_reject'],
+    ['POST', '/admin/bank',            'admin_api_bank_save'],
+    ['POST', '/admin/push-token',      'admin_api_push_save'],
+    ['POST', '/admin/push-token/remove', 'admin_api_push_remove'],
 ];
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -93,7 +106,7 @@ function auth_user(): array
     static $user = null;
     if ($user) return $user;
     $payload = jwt_decode(request_token() ?? fail('Please log in', 401));
-    if (!$payload) fail('Session expired. Please log in again.', 401);
+    if (!$payload || ($payload['typ'] ?? '') === 'admin') fail('Session expired. Please log in again.', 401);
     $user = row('SELECT * FROM users WHERE id = ?', [(int)$payload['sub']]);
     if (!$user) fail('Account not found', 401);
     if ($user['status'] === 'banned') fail('Your account has been suspended.' . ($user['ban_reason'] ? ' Reason: ' . $user['ban_reason'] : ''), 403, ['banned' => true]);

@@ -6,7 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { api, errMsg } from '@/lib/api';
 import { naira } from '@/lib/format';
 import { useLoad } from '@/lib/useLoad';
-import type { SpecialTask } from '@/lib/types';
+import type { SpecialTask, UnlockInfo } from '@/lib/types';
 import { C } from '@/lib/theme';
 import { useToast } from '@/components/toast';
 import { UnlockCard } from '@/components/UnlockCard';
@@ -17,7 +17,7 @@ type Picked = { uri: string; name: string; type: string };
 export default function SpecialDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
-  const { data, error, reload, setData } = useLoad(() => api<{ task: SpecialTask; unlocked: boolean; unlock_fee: number }>(`/special-tasks/${id}`));
+  const { data, error, reload, refetch, setData } = useLoad(() => api<{ task: SpecialTask } & UnlockInfo>(`/special-tasks/${id}`));
   const [proof, setProof] = useState<Picked | null>(null);
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
@@ -30,7 +30,7 @@ export default function SpecialDetail() {
   if (locked && !t.my_status) {
     return (
       <Screen header={<Header title="Special task" />}>
-        <UnlockCard fee={data.unlock_fee} onUnlocked={reload} />
+        <UnlockCard info={data} onChange={refetch} />
       </Screen>
     );
   }
@@ -89,7 +89,7 @@ export default function SpecialDetail() {
         {t.description ? <Sub style={{ marginTop: 12 }}>{t.description}</Sub> : null}
       </Card>
 
-      {locked && <View style={{ marginTop: 12 }}><UnlockCard fee={data.unlock_fee} onUnlocked={reload} /></View>}
+      {locked && <View style={{ marginTop: 12 }}><UnlockCard info={data} onChange={refetch} /></View>}
       {t.my_status === 'pending' && (
         <StatusCard tone="amber" icon="time" title="Submitted — pending review" text={`We'll add ${naira(t.reward)} to your cash balance once approved, usually within 24 hours.`} />
       )}

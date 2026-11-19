@@ -144,9 +144,19 @@ final class Push
             curl_multi_close($mh);
         }
         if ($dead) {
-            q('DELETE FROM push_tokens WHERE token IN (' . implode(',', array_fill(0, count($dead), '?')) . ')', $dead);
+            $in = implode(',', array_fill(0, count($dead), '?'));
+            q("DELETE FROM push_tokens WHERE token IN ($in)", $dead);
+            q("DELETE FROM admin_push_tokens WHERE token IN ($in)", $dead);
         }
         return [$sent, $failed];
+    }
+
+    /** Every phone where an admin is logged in to the admin screens of the app. */
+    public static function toAdmins(string $title, string $body, array $data = []): void
+    {
+        $tokens = array_column(rows('SELECT token FROM admin_push_tokens'), 'token');
+        if (!$tokens) return;
+        self::send($tokens, $title, $body, $data);
     }
 
     public static function toUser(int $userId, string $title, string $body, array $data = []): void
@@ -161,7 +171,7 @@ final class Push
  * so a slow Firebase call never delays the app or holds a database transaction open.
  * Pushes queued inside a transaction that rolls back are dropped (see tx()).
  */
-function queue_push(int $userId, string $title, string $body, array $data = []): void
+function queue_push(?int $userId, string $title, string $body, array $data = []): void
 {
     static $registered = false;
     $GLOBALS['push_queue'][] = [$userId, $title, $body, $data];
@@ -172,7 +182,7 @@ function queue_push(int $userId, string $title, string $body, array $data = []):
             if (!$queue || !Push::configured()) return;
             if (function_exists('fastcgi_finish_request')) @fastcgi_finish_request();
             foreach ($queue as [$uid, $t, $b, $d]) {
-                try { Push::toUser($uid, $t, $b, $d); } catch (Throwable $e) { log_line('push', $e->getMessage()); }
+                try { $uid === null ? Push::toAdmins($t, $b, $d) : Push::toUser($uid, $t, $b, $d); } catch (Throwable $e) { log_line('push', $e->getMessage()); }
             }
         });
     }

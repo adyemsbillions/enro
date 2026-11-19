@@ -1,55 +1,33 @@
-import { useCallback, useState } from 'react';
-import * as Linking from 'expo-linking';
-import * as WebBrowser from 'expo-web-browser';
-import { api, errMsg } from './api';
-import { useAuth } from './auth';
+import { Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { api } from './api';
+import type { UnlockInfo } from './types';
 
-type InitRes = { unlocked: boolean; reference?: string; url?: string };
-type VerifyRes = { status: 'paid' | 'pending' | 'failed' | 'abandoned'; unlocked: boolean };
+export type PickedImage = { uri: string; name: string; type: string };
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** Asks the server to confirm a payment with Paystack; retries briefly because bank transfers can take a moment. */
-export async function verifyUnlock(reference: string, tries = 6): Promise<VerifyRes> {
-  let last: VerifyRes = { status: 'pending', unlocked: false };
-  for (let i = 0; i < tries; i++) {
-    last = await api<VerifyRes>('/special-tasks/unlock/verify', { body: { reference } });
-    if (last.unlocked || last.status === 'failed' || last.status === 'abandoned') return last;
-    await sleep(2500);
-  }
-  return last;
+/** Lets the user choose a screenshot from their gallery. Returns null if they cancel. Throws if access is denied. */
+export async function pickImage(): Promise<PickedImage | null> {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) throw new Error('Allow photo access to upload your receipt');
+  const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+  if (r.canceled || !r.assets[0]) return null;
+  const a = r.assets[0];
+  return { uri: a.uri, name: a.fileName ?? 'receipt.jpg', type: a.mimeType ?? 'image/jpeg' };
 }
 
-/**
- * One-time fee that unlocks special tasks: opens Paystack checkout in an in-app browser,
- * then asks the server to verify the payment with Paystack before unlocking.
- */
-export function useUnlock(onDone: (message: string, unlocked: boolean) => void) {
-  const { refresh } = useAuth();
-  const [busy, setBusy] = useState(false);
+/** Adds an image to a FormData the way each platform expects. */
+export async function appendImage(form: FormData, field: string, img: PickedImage) {
+  if (Platform.OS === 'web') {
+    form.append(field, await (await fetch(img.uri)).blob(), img.name);
+  } else {
+    // React Native's FormData accepts {uri, name, type} file objects
+    form.append(field, { uri: img.uri, name: img.name, type: img.type } as unknown as Blob);
+  }
+}
 
-  const start = useCallback(async () => {
-    setBusy(true);
-    try {
-      const init = await api<InitRes>('/special-tasks/unlock', { method: 'POST' });
-      if (init.unlocked || !init.url || !init.reference) {
-        await refresh().catch(() => {});
-        onDone('Special tasks are unlocked', true);
-        return;
-      }
-      // Paystack redirects to our /pay/return.php, which hands back to enro://payment and closes this browser
-      await WebBrowser.openAuthSessionAsync(init.url, Linking.createURL('payment'));
-      const r = await verifyUnlock(init.reference);
-      await refresh().catch(() => {});
-      if (r.unlocked) onDone('Payment confirmed. Special tasks unlocked! 🎉', true);
-      else if (r.status === 'pending') onDone('Payment not confirmed yet. If you paid, pull down to refresh in a minute.', false);
-      else onDone('Payment was not completed. You have not been charged.', false);
-    } catch (e) {
-      onDone(errMsg(e), false);
-    } finally {
-      setBusy(false);
-    }
-  }, [onDone, refresh]);
-
-  return { start, busy };
+/** Sends the bank-transfer receipt for the unlock fee. Admins are notified and confirm it. */
+export async function uploadReceipt(img: PickedImage): Promise<UnlockInfo> {
+  const form = new FormData();
+  await appendImage(form, 'proof', img);
+  return api<UnlockInfo>('/special-tasks/unlock/receipt', { method: 'POST', form });
 }

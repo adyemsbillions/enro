@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams, type Href } from 'expo-router';
 import { api, ApiError, errMsg } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { deviceId } from '@/lib/device';
@@ -135,6 +135,10 @@ export default function Login() {
             <Link href="/signup" asChild><Pressable><T style={{ color: C.p, fontWeight: '700' }}>Create account</T></Pressable></Link>
           </View>
         )}
+        <Pressable onPress={() => router.push('/admin' as Href)} hitSlop={8} style={{ alignSelf: 'center', marginTop: 34, flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <Icon name="shield-checkmark-outline" size={14} color={C.mut} />
+          <T style={{ color: C.mut, fontWeight: '600', fontSize: 13 }}>Admin login</T>
+        </Pressable>
       </View>
     </Screen>
   );

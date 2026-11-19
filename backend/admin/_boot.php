@@ -132,18 +132,20 @@ function layout_start(string $title, string $page): void
     $a = require_admin();
     $pendSubs = (int)val("SELECT COUNT(*) FROM submissions WHERE status = 'pending'");
     $pendPay = (int)val("SELECT COUNT(*) FROM payouts WHERE status IN ('pending','processing')");
+    $pendRcpt = (int)val("SELECT COUNT(*) FROM payments WHERE method = 'transfer' AND status = 'pending'");
     $nav = [
         ['index.php', 'dash', 'chart', 'Dashboard', 0],
         ['tasks.php', 'tasks', 'list', 'Tasks', 0],
         ['special.php', 'special', 'star', 'Special tasks', 0],
         ['submissions.php', 'subs', 'image', 'Submissions', $pendSubs],
         ['payouts.php', 'payouts', 'wallet', 'Payouts', $pendPay],
-        ['payments.php', 'payments', 'cash', 'Unlock fees', 0],
+        ['payments.php', 'payments', 'cash', 'Unlock fees', $pendRcpt],
         ['users.php', 'users', 'users', 'Users', 0],
         ['plans.php', 'plans', 'wifi', 'Data plans', 0],
         ['notifications.php', 'push', 'bell', 'Notifications', 0],
         ['ads.php', 'ads', 'ad', 'Adsterra ads', 0],
         ['settings.php', 'settings', 'settings', 'Settings', 0],
+        ['admins.php', 'admins', 'users', 'Admins', 0],
     ];
     $f = flash();
     ?><!doctype html>
